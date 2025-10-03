@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Send, Sparkles, PanelLeft, PanelLeftClose, Copy, Check, RotateCw, ThumbsUp, ThumbsDown, Download } from 'lucide-react';
 import { detectWidgetQuery, type PersonaId } from '@/lib/query-detection';
-import { WidgetRenderer } from './WidgetRenderer';
+import { WidgetRenderer } from '@/components/widgets/WidgetRenderer';
 import { useQuickAction } from '@/contexts/QuickActionContext';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { Avatar } from '@/components/ui/Avatar';
@@ -269,8 +269,8 @@ export function InteractiveChat({ persona }: InteractiveChatProps = {}) {
       </button>
 
       {/* Messages Container */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="max-w-3xl mx-auto">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-6 pb-40">
+        <div className="max-w-3xl mx-auto pb-8">
           {messages.length === 0 && !isThinking && !isComposing && (
             <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center">
               <h1 className="text-4xl md:text-5xl font-medium text-foreground mb-3">

@@ -104,7 +104,20 @@ function detectCLevelQuery(q: string): QueryMatch | null {
     };
   }
 
-  // 2. Customer Risk Profile
+  // 2. Customer Risk Profile & High-Risk Customers
+  if (
+    q.includes('high-risk customers') ||
+    q.includes('at-risk customers') ||
+    q.includes('customer risk') ||
+    (q.includes('show me') && q.includes('risk'))
+  ) {
+    return {
+      widgetType: 'customer-risk-list',
+      widgetData: customerRiskListDemo,
+      responseText: "Here's the list of all high-risk customers requiring attention:",
+    };
+  }
+
   if (
     q.includes('tell me more about') ||
     q.includes('risk score') ||
@@ -140,7 +153,22 @@ function detectCLevelQuery(q: string): QueryMatch | null {
     };
   }
 
-  // 4. Meeting Scheduler
+  // 4. Ticket Detail (specific ticket numbers)
+  if (
+    q.includes('ticket #') ||
+    q.includes('ticket number') ||
+    /tick-?\d+/i.test(q) ||
+    (q.includes('show me ticket') && /\d+/.test(q)) ||
+    (q.includes('details') && /\d+/.test(q))
+  ) {
+    return {
+      widgetType: 'ticket-detail',
+      widgetData: ticketDetailDemo,
+      responseText: "Here are the complete details for this ticket:",
+    };
+  }
+
+  // 5. Meeting Scheduler
   if (
     q.includes('schedule') ||
     q.includes('book') ||
@@ -165,6 +193,7 @@ function detectManagerQuery(q: string): QueryMatch | null {
   if (
     q.includes("team's status") ||
     q.includes('team status') ||
+    q.includes('team workload') ||
     q.includes('show me my team') ||
     (q.includes('good morning') && q.includes('team'))
   ) {
@@ -179,6 +208,8 @@ function detectManagerQuery(q: string): QueryMatch | null {
   if (
     q.includes('top and bottom performers') ||
     q.includes('performance comparison') ||
+    q.includes('compare performance') ||
+    q.includes('compare agent performance') ||
     q.includes('top performers') ||
     q.includes('bottom performers') ||
     (q.includes('show me') && q.includes('performers'))
@@ -194,6 +225,8 @@ function detectManagerQuery(q: string): QueryMatch | null {
   if (
     q.includes('high-risk customers') ||
     q.includes('at-risk customers') ||
+    q.includes('customer risk') ||
+    q.includes('customers at risk') ||
     (q.includes('show me all') && q.includes('risk'))
   ) {
     return {
@@ -230,8 +263,10 @@ function detectManagerQuery(q: string): QueryMatch | null {
   // 6. Message Composer (for customer communication)
   if (
     q.includes('draft message') ||
+    q.includes('draft a message') ||
     q.includes('compose message') ||
     q.includes('write email') ||
+    q.includes('write a message') ||
     (q.includes('message') && q.includes('customer'))
   ) {
     return {
