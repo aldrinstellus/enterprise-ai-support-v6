@@ -3,11 +3,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Send, Sparkles, PanelLeft, PanelLeftClose, Copy, Check, RotateCw, ThumbsUp, ThumbsDown, Download } from 'lucide-react';
-import { findBestMatch } from '@/lib/c-level-conversation';
+import { detectWidgetQuery, type PersonaId } from '@/lib/query-detection';
 import { WidgetRenderer } from './WidgetRenderer';
 import { useQuickAction } from '@/contexts/QuickActionContext';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { Avatar } from '@/components/ui/Avatar';
+import type { Persona } from '@/types/persona';
 
 interface Message {
   id: string;
@@ -21,7 +22,11 @@ interface Message {
   isTyping?: boolean; // Track if this message is currently being typed
 }
 
-export function InteractiveChat() {
+interface InteractiveChatProps {
+  persona?: Persona;
+}
+
+export function InteractiveChat({ persona }: InteractiveChatProps = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -140,7 +145,8 @@ export function InteractiveChat() {
       setMessages(prev => prev.slice(0, lastIndex + 1));
       // Re-submit the query
       setTimeout(() => {
-        const match = findBestMatch(query);
+        const personaId = (persona?.id || 'c-level') as PersonaId;
+        const match = detectWidgetQuery(query, personaId);
         if (match) {
           handleMatch(match, query);
         }
@@ -172,15 +178,18 @@ export function InteractiveChat() {
 
   // Helper to handle matched responses
   const handleMatch = async (match: any, query: string) => {
+    // Support both old format (aiResponse) and new format (responseText)
+    const responseText = match.responseText || match.aiResponse;
+
     // Phase 1 & 2: Thinking and Composing animations
-    await simulateAIResponse(match.aiResponse);
+    await simulateAIResponse(responseText);
 
     // Create message with isTyping flag
     const messageId = `ai-${Date.now()}`;
     const aiMessage: Message = {
       id: messageId,
       type: 'ai',
-      content: match.aiResponse,
+      content: responseText,
       timestamp: new Date(),
       userQuery: query,
       isTyping: true,
@@ -188,7 +197,7 @@ export function InteractiveChat() {
     setMessages((prev) => [...prev, aiMessage]);
 
     // Phase 3: Typewriter effect - reveal text word by word
-    await typewriterEffect(match.aiResponse, messageId);
+    await typewriterEffect(responseText, messageId);
 
     // Show widget after typing completes
     if (match.widgetType && match.widgetData) {
@@ -220,8 +229,9 @@ export function InteractiveChat() {
     const query = inputValue;
     setInputValue('');
 
-    // Find matching response
-    const match = findBestMatch(query);
+    // Find matching response using persona-aware query detection
+    const personaId = (persona?.id || 'c-level') as PersonaId;
+    const match = detectWidgetQuery(query, personaId);
 
     if (match) {
       await handleMatch(match, query);
@@ -290,7 +300,7 @@ export function InteractiveChat() {
                       </div>
                     </div>
                     <Avatar
-                      name="Sarah Chen"
+                      name={persona?.name || 'User'}
                       size={32}
                       variant="chat"
                     />

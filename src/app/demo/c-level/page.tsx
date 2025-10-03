@@ -1,7 +1,7 @@
 'use client';
 
-import { InteractiveChat } from '@/components/chat/InteractiveChat';
+import { InteractiveChatWithFloatingInput } from '@/components/chat/InteractiveChatWithFloatingInput';
 
 export default function CLevelDemoPage() {
-  return <InteractiveChat />;
+  return <InteractiveChatWithFloatingInput />;
 }

@@ -5,10 +5,12 @@ import { Send } from 'lucide-react';
 import { InteractiveChat } from './InteractiveChat';
 import { CommandPalette } from '../concepts/CommandPalette';
 import { usePersona } from '@/hooks/use-persona';
+import { useSidebar } from '@/contexts/SidebarContext';
 import { getDashboardWidgets } from '@/config/dashboard-widgets';
 
-export function Concept3Chat() {
+export function InteractiveChatWithFloatingInput() {
   const { currentPersona } = usePersona();
+  const { sidebarOpen } = useSidebar();
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,20 +52,20 @@ export function Concept3Chat() {
   };
 
   return (
-    <div className="relative h-screen">
+    <div className="relative h-full">
       {/* Hide InteractiveChat's default input with CSS */}
       <style jsx global>{`
-        .concept3-wrapper .border-t.border-border.bg-card {
+        .floating-input-wrapper .border-t.border-border.bg-card {
           display: none;
         }
       `}</style>
 
-      <div className="concept3-wrapper">
-        <InteractiveChat />
+      <div className="floating-input-wrapper h-full">
+        <InteractiveChat persona={currentPersona} />
       </div>
 
       {/* Floating Input Bar */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-6 flex items-center gap-3 z-10">
+      <div className={`fixed bottom-8 ${sidebarOpen ? 'left-[calc(50%+150px)]' : 'left-1/2'} -translate-x-1/2 w-full max-w-4xl px-6 flex items-center gap-3 z-10 transition-all duration-300`}>
         {/* Input with inline Send button */}
         <form onSubmit={handleSubmit} className="flex-1 relative">
           <input
