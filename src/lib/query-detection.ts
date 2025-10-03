@@ -2,6 +2,7 @@
 // Maps natural language queries to appropriate widgets based on persona and intent
 
 import type { WidgetType, WidgetData } from '@/types/widget';
+import { findBestMatch } from './c-level-conversation';
 import {
   executiveSummaryDemo,
   customerRiskProfileDemo,
@@ -57,8 +58,19 @@ export function detectWidgetQuery(
 // ============================================================================
 
 function detectCLevelQuery(q: string): QueryMatch | null {
+  // NEW: Use Bhanu's pattern matching from c-level-conversation.ts
+  const bhanuMatch = findBestMatch(q);
+  if (bhanuMatch) {
+    // Map Bhanu's widget types to our WidgetType
+    return {
+      widgetType: bhanuMatch.widgetType as WidgetType,
+      widgetData: bhanuMatch.widgetData,
+      responseText: bhanuMatch.aiResponse,
+    };
+  }
+
+  // FALLBACK: Original pattern matching for backward compatibility
   // EXACT QUERY MATCHING (checked first - no ambiguity, no cache issues)
-  // This ensures specific queries always get the right response
   const exactMatches: Record<string, QueryMatch> = {
     'show me the sla performance breakdown': {
       widgetType: 'sla-performance-chart',
@@ -72,7 +84,7 @@ function detectCLevelQuery(q: string): QueryMatch | null {
     },
   };
 
-  // Check for exact match first
+  // Check for exact match
   if (exactMatches[q]) {
     return exactMatches[q];
   }
