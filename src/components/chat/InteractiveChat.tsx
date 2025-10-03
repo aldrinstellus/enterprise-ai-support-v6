@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Send, Sparkles, PanelLeft, PanelLeftClose, Copy, Check, RotateCw, ThumbsUp, ThumbsDown, Download } from 'lucide-react';
 import { detectWidgetQuery, type PersonaId } from '@/lib/query-detection';
@@ -31,7 +31,8 @@ export interface InteractiveChatRef {
 }
 
 export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatProps>(function InteractiveChat({ persona }, ref) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  // Per-persona message storage
+  const [messagesByPersona, setMessagesByPersona] = useState<Record<string, Message[]>>({});
   const [inputValue, setInputValue] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
@@ -46,6 +47,28 @@ export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatPro
   const { quickActionQuery } = useQuickAction();
   const { sidebarOpen, toggleSidebar } = useSidebar();
   const searchParams = useSearchParams();
+
+  // Get current persona ID (memoized to ensure it updates when persona changes)
+  const personaId = useMemo(() => (persona?.id || 'c-level') as PersonaId, [persona?.id]);
+
+  // DEBUG: Log when persona changes
+  useEffect(() => {
+    console.log('[InteractiveChat] Persona changed to:', personaId);
+    console.log('[InteractiveChat] All messages by persona:', messagesByPersona);
+    console.log('[InteractiveChat] Current persona messages:', messagesByPersona[personaId] || []);
+  }, [personaId, messagesByPersona]);
+
+  // Get current persona's messages
+  const messages = useMemo(() => messagesByPersona[personaId] || [], [messagesByPersona, personaId]);
+
+  // Helper to update current persona's messages
+  const setMessages = useCallback((updater: Message[] | ((prev: Message[]) => Message[])) => {
+    setMessagesByPersona(prev => {
+      const currentMessages = prev[personaId] || [];
+      const newMessages = typeof updater === 'function' ? updater(currentMessages) : updater;
+      return { ...prev, [personaId]: newMessages };
+    });
+  }, [personaId]);
 
   // Expose submitQuery method via ref
   useImperativeHandle(ref, () => ({
@@ -429,6 +452,7 @@ export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatPro
                       <WidgetRenderer
                         type={message.widgetType!}
                         data={message.widgetData}
+                        onAction={(action) => processQuery(action)}
                       />
                     </div>
                   </div>

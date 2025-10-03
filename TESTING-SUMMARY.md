@@ -439,8 +439,128 @@ The application is ready for user acceptance testing and production deployment.
 
 ---
 
+## Update - October 3, 2025 (CS Manager Session)
+
+### CS Manager Persona Testing (6 Queries)
+
+Successfully tested and fixed CS Manager persona with focus on multi-turn conversation flows, dynamic widget personalization, and interactive button callbacks.
+
+#### Issues Found & Fixed
+
+**Issue #1: Team Workload Dashboard - Cramped 4-Column Layout**
+- **Problem**: Team member cards displayed in 4 columns on large screens, causing cramped UX
+- **Root Cause**: Responsive classes `grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` made cards too narrow
+- **Fix**: Changed to `grid-cols-1 md:grid-cols-2` for better readability with more breathing room
+- **File**: `src/components/widgets/TeamWorkloadDashboardWidget.tsx` (line 90)
+- **User Feedback**: Improved UX with 2-column layout
+
+**Issue #2: Ticket List Title - Generic "My Tickets" Instead of Agent Name**
+- **Problem**: Query "Show me Sarah's tickets" displayed "My Tickets" instead of "Sarah's Tickets"
+- **Root Cause**: Demo data had hardcoded `title: 'My Tickets'`
+- **Fix**: Added regex pattern matching to extract agent name and personalize title dynamically
+- **File**: `src/lib/query-detection.ts` (lines 245-257)
+- **Pattern**: `/(?:show me |his |her )(\w+)(?:'s)?\s*tickets/i`
+- **Result**: "Sarah's Tickets", "Marcus's Tickets", etc.
+
+**Issue #3: Meeting Scheduler - Missing Multi-Turn Conversation Flow**
+- **Problem**: "Schedule a 1-on-1 coaching session with Marcus" showed calendar immediately, not following C-Level's 3-step pattern
+- **Expected**: Ask "Would you like me to check availability?" → Show calendar on "yes" → Show confirmation on "book"
+- **Root Cause**: CS Manager used simple pattern matching instead of conversation architecture
+- **Fix**: Created `src/lib/cs-manager-conversation.ts` with multi-turn conversation entries
+- **Files Created**: `src/lib/cs-manager-conversation.ts` (122 lines)
+- **Files Modified**: `src/lib/query-detection.ts` (added `findCSManagerMatch()` integration)
+- **Pattern Matching**: Scoring algorithm prioritizes specific matches over generic ones
+- **User Feedback**: "shouldnt the same workflow that u did for calendar follow"
+
+**Issue #4: Meeting Scheduler - Wrong Attendees (Missing Marcus)**
+- **Problem**: Showed generic attendees from demo data instead of Marcus
+- **Root Cause**: Meeting scheduler used hardcoded demo data without personalization
+- **Fix**: Extract person name from query and create customized attendee list
+- **Implementation**:
+  - Regex: `/(?:with |session with )(\w+)/i` captures "Marcus"
+  - Dynamic title: "Schedule 1-on-1 with Marcus"
+  - Attendees: ["You (CS Manager)", "Marcus (Support Agent)"]
+- **File**: `src/lib/cs-manager-conversation.ts` (lines 41-62)
+
+**Issue #5: Message Composer Buttons - No Interactivity**
+- **Problem**: Clicking "Send Message", "Save as Draft", "Save as Template" did nothing
+- **Expected**: AI confirmation message after clicking buttons
+- **Root Cause**: Widgets had no callback mechanism to trigger follow-up actions
+- **Fix**: Implemented callback architecture with `onAction` prop
+- **Files Modified**:
+  - `src/components/chat/InteractiveChat.tsx` (line 455) - passes `onAction` callback
+  - `src/components/widgets/WidgetRenderer.tsx` (lines 21-27, 82) - accepts and forwards callback
+  - `src/components/widgets/MessageComposerWidget.tsx` (lines 4, 197-218) - onClick handlers
+- **Conversation Entries Added** (cs-manager-conversation.ts):
+  - "send the message" → "✓ Message sent to Acme Corp successfully!"
+  - "save as draft" → "✓ Message saved as draft"
+  - "save as template" → "✓ Message saved as template 'Customer Outage Response'"
+- **Architecture**: Widget buttons call `onAction('action')` → triggers query processing → shows AI response
+
+**Issue #6: Per-Persona Message Persistence**
+- **Problem**: Switching personas showed previous persona's conversation history
+- **Expected**: Each persona maintains separate conversation history
+- **Root Cause**: Single `messages` state shared across all personas
+- **Fix Attempted**: Implemented `messagesByPersona` with `Record<string, Message[]>`
+- **Status**: DEFERRED - needs debugging (console logging added for investigation)
+- **Files Modified**: `src/components/chat/InteractiveChat.tsx` (lines 35-64)
+- **Note**: User requested to defer this fix and continue testing
+
+#### CS Manager Test Results
+
+| Query | Widget Type | Status |
+|-------|-------------|--------|
+| "Show me my team's status" | team-workload-dashboard | ✅ PASS |
+| "Who are the top and bottom performers?" | agent-performance-comparison | (Not Tested) |
+| "Show me all high-risk customers" | customer-risk-list | (Not Tested) |
+| "Show me Sarah's tickets" | ticket-list (personalized) | ✅ PASS |
+| "Schedule a 1-on-1 coaching session with Marcus" (multi-turn) | meeting-scheduler → meeting-confirmation | ✅ PASS |
+| "Draft a message to Acme Corp about the outage" (with buttons) | message-composer (interactive) | ✅ PASS |
+
+**Pass Rate**: 4/4 tested (100%)
+
+#### New Architecture: CS Manager Conversation System
+
+Created comprehensive conversation pattern matching system modeled after C-Level implementation:
+
+**File**: `src/lib/cs-manager-conversation.ts` (122 lines)
+- **Interface**: `ConversationEntry` with triggers, userQuery, aiResponse, widgetType, widgetData
+- **Entries**: 6 conversation patterns (3 for scheduling flow, 3 for message composer actions)
+- **Algorithm**: Scored pattern matching prioritizes longer, more specific triggers
+- **Integration**: Imported in `query-detection.ts` and called before fallback patterns
+
+**Multi-Turn Conversations**:
+1. **Q1**: "Schedule 1-on-1 with Marcus" → AI asks "Would you like me to check calendars?"
+2. **Q2**: "yes" → Shows meeting-scheduler with Marcus as attendee
+3. **Q3**: "book tomorrow at 1pm" → Shows meeting-confirmation
+
+**Button Actions**:
+4. **Q4**: "send the message" → Confirmation message
+5. **Q5**: "save as draft" → Draft saved confirmation
+6. **Q6**: "save as template" → Template saved confirmation
+
+#### Technical Improvements
+
+1. **Multi-Turn Conversation Support**: CS Manager now uses same pattern as C-Level for natural conversation flows
+2. **Dynamic Widget Personalization**: Ticket lists, meeting schedulers adapt based on query content (names, etc.)
+3. **Interactive Widget Callbacks**: Widgets can trigger follow-up actions via `onAction` prop
+4. **Responsive Layout Optimization**: 2-column grid for better readability on all screen sizes
+5. **Conversation Architecture Reusability**: Pattern can be extended to Support Agent persona
+
+#### Files Modified (CS Manager Session)
+
+1. `src/lib/cs-manager-conversation.ts` (NEW - 122 lines)
+2. `src/lib/query-detection.ts` (added CS Manager conversation integration)
+3. `src/components/chat/InteractiveChat.tsx` (per-persona messages + onAction callback)
+4. `src/components/widgets/WidgetRenderer.tsx` (onAction prop support)
+5. `src/components/widgets/TeamWorkloadDashboardWidget.tsx` (2-column layout)
+6. `src/components/widgets/MessageComposerWidget.tsx` (interactive buttons)
+7. `TESTING-SUMMARY.md` (this file)
+
+---
+
 **Generated**: October 3, 2025
 **Tester**: Claude Code & User
 **Repository**: enterprise-ai-support-v4
 **Branch**: main
-**Last Updated**: October 3, 2025 - Afternoon Session
+**Last Updated**: October 3, 2025 - CS Manager Session Complete

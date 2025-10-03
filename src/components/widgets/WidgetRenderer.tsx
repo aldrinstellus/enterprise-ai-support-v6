@@ -21,9 +21,10 @@ import { MessageComposerWidget } from './MessageComposerWidget';
 interface WidgetRendererProps {
   type: WidgetType;
   data: WidgetData;
+  onAction?: (action: string) => void;
 }
 
-export function WidgetRenderer({ type, data }: WidgetRendererProps) {
+export function WidgetRenderer({ type, data, onAction }: WidgetRendererProps) {
   // Route to appropriate widget component based on type
   switch (type) {
     case 'executive-summary':
@@ -78,7 +79,7 @@ export function WidgetRenderer({ type, data }: WidgetRendererProps) {
       return <KnowledgeArticleWidget data={data as any} />;
 
     case 'message-composer':
-      return <MessageComposerWidget data={data as any} />;
+      return <MessageComposerWidget data={data as any} onAction={onAction} />;
 
     default:
       // Fallback for unimplemented widgets

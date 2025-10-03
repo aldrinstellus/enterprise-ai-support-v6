@@ -2,7 +2,8 @@
 // Maps natural language queries to appropriate widgets based on persona and intent
 
 import type { WidgetType, WidgetData } from '@/types/widget';
-import { findBestMatch } from './c-level-conversation';
+import { findBestMatch as findCLevelMatch } from './c-level-conversation';
+import { findBestMatch as findCSManagerMatch } from './cs-manager-conversation';
 import {
   executiveSummaryDemo,
   customerRiskProfileDemo,
@@ -59,7 +60,7 @@ export function detectWidgetQuery(
 
 function detectCLevelQuery(q: string): QueryMatch | null {
   // NEW: Use Bhanu's pattern matching from c-level-conversation.ts
-  const bhanuMatch = findBestMatch(q);
+  const bhanuMatch = findCLevelMatch(q);
   if (bhanuMatch) {
     // Map Bhanu's widget types to our WidgetType
     return {
@@ -189,6 +190,18 @@ function detectCLevelQuery(q: string): QueryMatch | null {
 // ============================================================================
 
 function detectManagerQuery(q: string): QueryMatch | null {
+  // NEW: Use conversation pattern matching from cs-manager-conversation.ts
+  const conversationMatch = findCSManagerMatch(q);
+  if (conversationMatch) {
+    // Map conversation entry to QueryMatch
+    return {
+      widgetType: conversationMatch.widgetType as WidgetType,
+      widgetData: conversationMatch.widgetData as any,
+      responseText: conversationMatch.aiResponse,
+    };
+  }
+
+  // FALLBACK: Original pattern matching for backward compatibility
   // 1. Team Workload Dashboard
   if (
     q.includes("team's status") ||
@@ -242,23 +255,22 @@ function detectManagerQuery(q: string): QueryMatch | null {
     q.includes('his tickets') ||
     q.includes('her tickets')
   ) {
+    // Extract agent name from query (e.g., "Sarah" from "Show me Sarah's tickets")
+    const nameMatch = q.match(/(?:show me |his |her )(\w+)(?:'s)?\s*tickets/i);
+    const agentName = nameMatch ? nameMatch[1] : "the agent";
+    const capitalizedName = agentName.charAt(0).toUpperCase() + agentName.slice(1);
+
     return {
       widgetType: 'ticket-list',
-      widgetData: ticketListDemo,
-      responseText: "Here are the agent's current tickets:",
+      widgetData: {
+        ...ticketListDemo,
+        title: `${capitalizedName}'s Tickets`
+      },
+      responseText: `Here are ${capitalizedName}'s current tickets:`,
     };
   }
 
-  // 5. Meeting Scheduler (for 1-on-1)
-  if (
-    q.includes('schedule') && (q.includes('1-on-1') || q.includes('coaching'))
-  ) {
-    return {
-      widgetType: 'meeting-scheduler',
-      widgetData: meetingSchedulerDemo,
-      responseText: "Here are available time slots for the 1-on-1 meeting:",
-    };
-  }
+  // 5. Meeting Scheduler (for 1-on-1) - Now handled by cs-manager-conversation.ts
 
   // 6. Message Composer (for customer communication)
   if (

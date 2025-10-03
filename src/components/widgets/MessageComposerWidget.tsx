@@ -1,7 +1,7 @@
 import { Mail, User, Building, Calendar, Clock, Send, Lightbulb, FileText, Ticket, Heart } from 'lucide-react';
 import type { MessageComposerData } from '@/types/widget';
 
-export function MessageComposerWidget({ data }: { data: MessageComposerData }) {
+export function MessageComposerWidget({ data, onAction }: { data: MessageComposerData; onAction?: (action: string) => void }) {
   const toneColors = {
     professional: 'text-primary bg-primary/10 border-primary/20',
     empathetic: 'text-chart-2 bg-chart-2/10 border-chart-2/20',
@@ -194,15 +194,24 @@ export function MessageComposerWidget({ data }: { data: MessageComposerData }) {
 
       {/* Actions */}
       <div className="flex items-center gap-2 pt-2">
-        <button className="flex items-center gap-2 text-sm text-primary-foreground bg-primary hover:bg-primary/90 font-medium px-6 py-2.5 rounded shadow-sm hover:shadow transition-all">
+        <button
+          onClick={() => onAction?.('send the message')}
+          className="flex items-center gap-2 text-sm text-primary-foreground bg-primary hover:bg-primary/90 font-medium px-6 py-2.5 rounded shadow-sm hover:shadow transition-all"
+        >
           <Send className="h-4 w-4" />
           Send Message
         </button>
-        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium px-4 py-2.5 rounded bg-muted/20 hover:bg-muted/30 border border-border hover:border-border/80 transition-all">
+        <button
+          onClick={() => onAction?.('save as draft')}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium px-4 py-2.5 rounded bg-muted/20 hover:bg-muted/30 border border-border hover:border-border/80 transition-all"
+        >
           <FileText className="h-4 w-4" />
           Save as Draft
         </button>
-        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium px-4 py-2.5 rounded bg-muted/20 hover:bg-muted/30 border border-border hover:border-border/80 transition-all">
+        <button
+          onClick={() => onAction?.('save as template')}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium px-4 py-2.5 rounded bg-muted/20 hover:bg-muted/30 border border-border hover:border-border/80 transition-all"
+        >
           <Heart className="h-4 w-4" />
           Save as Template
         </button>
