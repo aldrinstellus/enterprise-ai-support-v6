@@ -341,7 +341,7 @@ export const conversationEntries: ConversationEntry[] = [
     aiResponse: "Here's the escalation timeline for the Acme Corp authentication issue:",
     widgetType: 'escalation-path',
     widgetData: {
-      ticketId: 'TICKET-2847',
+      ticketId: 'TICK-001',
       currentStage: 2,
       stages: [
         {
@@ -391,7 +391,12 @@ export const conversationEntries: ConversationEntry[] = [
   // Q8: Find Meeting Time
   {
     id: 'q8-find-time',
-    triggers: ['find time', 'availability', 'check calendar', 'schedule meeting', 'calendar'],
+    triggers: [
+      // Affirmative responses (for Q7 "Would you like me to check availability?" follow-up)
+      'yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'please', 'go ahead', 'proceed',
+      // Original explicit triggers
+      'find time', 'availability', 'check calendar', 'schedule meeting', 'calendar'
+    ],
     userQuery: 'Yes, find a time today or tomorrow. Make it 1 hour.',
     aiResponse: "I've checked everyone's calendars. Here are the available time slots:",
     widgetType: 'meeting-scheduler',
@@ -529,15 +534,29 @@ export const conversationEntries: ConversationEntry[] = [
   },
 ];
 
-// Pattern matching function to find the best match
+// Pattern matching function to find the best match with scoring
 export function findBestMatch(userInput: string): ConversationEntry | null {
   const normalizedInput = userInput.toLowerCase().trim();
 
-  // Find entries where at least one trigger matches
-  const matches = conversationEntries.filter((entry) =>
-    entry.triggers.some((trigger) => normalizedInput.includes(trigger.toLowerCase()))
-  );
+  // Score each entry based on trigger matches
+  const scoredMatches = conversationEntries
+    .map((entry) => {
+      const matchedTriggers = entry.triggers.filter((trigger) =>
+        normalizedInput.includes(trigger.toLowerCase())
+      );
 
-  // Return first match (could be enhanced with scoring)
-  return matches.length > 0 ? matches[0] : null;
+      if (matchedTriggers.length === 0) return null;
+
+      // Calculate score: number of matches + total length of matched triggers
+      const score = matchedTriggers.reduce((sum, trigger) => sum + trigger.length, 0) + (matchedTriggers.length * 10);
+
+      return { entry, score, matchCount: matchedTriggers.length };
+    })
+    .filter((match) => match !== null) as Array<{ entry: ConversationEntry; score: number; matchCount: number }>;
+
+  // Return entry with highest score (most specific match)
+  if (scoredMatches.length === 0) return null;
+
+  scoredMatches.sort((a, b) => b.score - a.score);
+  return scoredMatches[0].entry;
 }

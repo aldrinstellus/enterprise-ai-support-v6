@@ -5,6 +5,7 @@ import { TicketListWidget } from './TicketListWidget';
 import { AgentDashboardWidget } from './AgentDashboardWidget';
 import { TeamWorkloadDashboardWidget } from './TeamWorkloadDashboardWidget';
 import { MeetingSchedulerWidget } from './MeetingSchedulerWidget';
+import { MeetingConfirmationWidget } from './MeetingConfirmationWidget';
 import { CustomerRiskListWidget } from './CustomerRiskListWidget';
 import { TicketDetailWidget } from './TicketDetailWidget';
 import { SLAPerformanceChartWidget } from './SLAPerformanceChartWidget';
@@ -42,6 +43,9 @@ export function WidgetRenderer({ type, data }: WidgetRendererProps) {
 
     case 'meeting-scheduler':
       return <MeetingSchedulerWidget data={data as any} />;
+
+    case 'meeting-confirmation':
+      return <MeetingConfirmationWidget data={data as any} />;
 
     case 'customer-risk-list':
       return <CustomerRiskListWidget data={data as any} />;

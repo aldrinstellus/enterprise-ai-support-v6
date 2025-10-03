@@ -168,7 +168,7 @@ export const customerRiskProfileDemo: CustomerRiskProfileData = {
 
 // Ticket Detail Widget Data (All personas - most critical widget)
 export const ticketDetailDemo: TicketDetailData = {
-  ticketId: 'TKT-2847',
+  ticketId: 'TICK-001',
   priority: 'critical',
   status: 'in-progress',
   subject: 'Authentication failures affecting 200+ users',

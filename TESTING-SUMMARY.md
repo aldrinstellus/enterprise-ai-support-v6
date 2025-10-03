@@ -1,8 +1,8 @@
 # Testing Summary - Multi-Persona Query Detection & Widget Rendering
 
-**Date**: October 3, 2025
+**Date**: October 3, 2025 (Updated)
 **Testing Scope**: Comprehensive testing of Concept 3 floating input design with multi-persona query detection across C-Level, CS Manager, and Support Agent personas
-**Status**: ✅ All Issues Fixed
+**Status**: ✅ All Issues Fixed - C-Level Persona Complete
 
 ---
 
@@ -368,8 +368,79 @@ The application is ready for user acceptance testing and production deployment.
 
 ---
 
+## Update - October 3, 2025 (Afternoon Session)
+
+### Additional Critical Fixes Applied
+
+**Session Focus**: Fixed query processing architecture and completed C-Level persona testing (6/6 queries)
+
+#### Issues Fixed
+
+1. **Query Processing Failure** ✅
+   - **Problem**: URL parameter approach using `useSearchParams()` didn't react to manual `window.history.pushState()`
+   - **Root Cause**: Next.js routing hooks don't pick up manual URL changes
+   - **Solution**: Implemented direct component communication via React refs (`useImperativeHandle`)
+   - **Files Changed**:
+     - `InteractiveChat.tsx` - Added `forwardRef` and `submitQuery()` method
+     - `InteractiveChatWithFloatingInput.tsx` - Uses ref instead of URL parameters
+
+2. **Widget Prop Name Mismatch** ✅
+   - **Problem**: WidgetRenderer expects `type` prop, InteractiveChat passed `widgetType`
+   - **Solution**: Changed prop name from `widgetType` to `type` in widget renderer call
+   - **File**: `InteractiveChat.tsx:430`
+
+3. **Conversational Follow-up Not Working** ✅
+   - **Problem**: User typing "yes" after "Would you like me to check availability?" wasn't understood
+   - **Solution**: Added affirmative response triggers: 'yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'please'
+   - **File**: `c-level-conversation.ts:394-399`
+
+4. **Pattern Matching Conflicts** ✅
+   - **Problem**: Generic "yes" matched Q8, then "book tomorrow" also matched Q8 instead of Q9
+   - **Solution**: Implemented scoring-based pattern matching (trigger length + count × 10)
+   - **File**: `c-level-conversation.ts:537-562`
+
+5. **Meeting Confirmation Widget Missing** ✅
+   - **Problem**: Widget type 'meeting-confirmation' not registered in WidgetRenderer
+   - **Solution**: Added import and case statement for MeetingConfirmationWidget
+   - **File**: `WidgetRenderer.tsx:8, 47-48`
+
+6. **Ticket ID Consistency** ✅
+   - **Problem**: Demo showed TKT-2847 instead of queried TICK-001
+   - **Solution**: Updated primary ticket ID while keeping related tickets different
+   - **Files**: `demo-widget-data.ts:171`, `c-level-conversation.ts:344`
+
+### C-Level Testing Results - COMPLETE ✅
+
+| Query | Widget | Status |
+|-------|--------|--------|
+| "Show me executive summary" | executive-summary | ✅ PASS |
+| "Schedule executive call" → "yes" → "book tomorrow at 1pm" | meeting-scheduler → meeting-confirmation | ✅ PASS (3-step flow) |
+| "Tell me more about Acme Corp" | customer-risk-profile | ✅ PASS |
+| "Show me the SLA performance breakdown" | sla-performance-chart | ✅ PASS |
+| "Show me high-risk customers" | customer-risk-list | ✅ PASS |
+| "Show me ticket TICK-001" | ticket-detail | ✅ PASS |
+
+**Pass Rate**: 6/6 (100%)
+
+### Technical Improvements
+
+1. **Ref-based Communication**: More reliable than URL parameters for component interaction
+2. **Scored Pattern Matching**: Prevents ambiguous matches, selects most specific pattern
+3. **Conversational Context**: Supports natural follow-up responses in multi-turn conversations
+4. **Widget Completeness**: All 18 widgets now accessible (added meeting-confirmation)
+
+### Files Modified (Today's Session)
+
+1. `src/components/chat/InteractiveChat.tsx`
+2. `src/components/chat/InteractiveChatWithFloatingInput.tsx`
+3. `src/components/widgets/WidgetRenderer.tsx`
+4. `src/lib/c-level-conversation.ts`
+5. `src/data/demo-widget-data.ts`
+
+---
+
 **Generated**: October 3, 2025
-**Tester**: Claude Code
+**Tester**: Claude Code & User
 **Repository**: enterprise-ai-support-v4
 **Branch**: main
-**Commit**: 12cd76c
+**Last Updated**: October 3, 2025 - Afternoon Session

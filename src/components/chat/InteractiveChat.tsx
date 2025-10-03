@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Send, Sparkles, PanelLeft, PanelLeftClose, Copy, Check, RotateCw, ThumbsUp, ThumbsDown, Download } from 'lucide-react';
 import { detectWidgetQuery, type PersonaId } from '@/lib/query-detection';
@@ -26,7 +26,11 @@ interface InteractiveChatProps {
   persona?: Persona;
 }
 
-export function InteractiveChat({ persona }: InteractiveChatProps = {}) {
+export interface InteractiveChatRef {
+  submitQuery: (query: string) => void;
+}
+
+export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatProps>(function InteractiveChat({ persona }, ref) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -42,6 +46,46 @@ export function InteractiveChat({ persona }: InteractiveChatProps = {}) {
   const { quickActionQuery } = useQuickAction();
   const { sidebarOpen, toggleSidebar } = useSidebar();
   const searchParams = useSearchParams();
+
+  // Expose submitQuery method via ref
+  useImperativeHandle(ref, () => ({
+    submitQuery: (query: string) => {
+      processQuery(query);
+    },
+  }));
+
+  // Process a query string (used by both form submit and ref call)
+  const processQuery = async (query: string) => {
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      type: 'user',
+      content: query,
+      timestamp: new Date(),
+    };
+
+    // Add user message
+    setMessages((prev) => [...prev, userMessage]);
+
+    // Find matching response using persona-aware query detection
+    const personaId = (persona?.id || 'c-level') as PersonaId;
+    const match = detectWidgetQuery(query, personaId);
+
+    if (match) {
+      await handleMatch(match, query);
+    } else {
+      // No match found - helpful response
+      await simulateAIResponse('I can help with that.');
+      const fallbackMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: 'ai',
+        content:
+          "I'm not sure I understood that. Try asking about:\n- Executive summary\n- Analytics\n- Acme Corp risk\n- Sentiment analysis\n- Escalation path\n- SLA performance\n- Schedule a meeting",
+        timestamp: new Date(),
+        userQuery: query,
+      };
+      setMessages((prev) => [...prev, fallbackMessage]);
+    }
+  };
 
   // Detect if user is at bottom of scroll container
   useEffect(() => {
@@ -217,37 +261,10 @@ export function InteractiveChat({ persona }: InteractiveChatProps = {}) {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date(),
-    };
-
-    // Add user message
-    setMessages((prev) => [...prev, userMessage]);
     const query = inputValue;
     setInputValue('');
 
-    // Find matching response using persona-aware query detection
-    const personaId = (persona?.id || 'c-level') as PersonaId;
-    const match = detectWidgetQuery(query, personaId);
-
-    if (match) {
-      await handleMatch(match, query);
-    } else {
-      // No match found - helpful response
-      await simulateAIResponse('I can help with that.');
-      const fallbackMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: 'ai',
-        content:
-          "I'm not sure I understood that. Try asking about:\n- Executive summary\n- Analytics\n- Acme Corp risk\n- Sentiment analysis\n- Escalation path\n- SLA performance\n- Schedule a meeting",
-        timestamp: new Date(),
-        userQuery: query,
-      };
-      setMessages((prev) => [...prev, fallbackMessage]);
-    }
+    await processQuery(query);
 
     // Refocus input
     inputRef.current?.focus();
@@ -410,7 +427,7 @@ export function InteractiveChat({ persona }: InteractiveChatProps = {}) {
                     <div className="w-8 h-8 flex-shrink-0" />
                     <div className="max-w-4xl w-full">
                       <WidgetRenderer
-                        widgetType={message.widgetType!}
+                        type={message.widgetType!}
                         data={message.widgetData}
                       />
                     </div>
@@ -484,4 +501,4 @@ export function InteractiveChat({ persona }: InteractiveChatProps = {}) {
       </div>
     </div>
   );
-}
+});

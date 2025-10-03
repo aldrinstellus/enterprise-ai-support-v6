@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react';
-import { InteractiveChat } from './InteractiveChat';
+import { InteractiveChat, type InteractiveChatRef } from './InteractiveChat';
 import { CommandPalette } from '../concepts/CommandPalette';
 import { usePersona } from '@/hooks/use-persona';
 import { useSidebar } from '@/contexts/SidebarContext';
@@ -14,6 +14,7 @@ export function InteractiveChatWithFloatingInput() {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatRef = useRef<InteractiveChatRef>(null);
   const widgets = getDashboardWidgets(currentPersona.id);
 
   useEffect(() => {
@@ -30,22 +31,16 @@ export function InteractiveChatWithFloatingInput() {
   }, []);
 
   const handleWidgetClick = (query: string) => {
-    // Trigger the query in InteractiveChat via URL parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('query', query);
-    window.history.pushState({}, '', url);
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    // Trigger the query in InteractiveChat via ref
+    chatRef.current?.submitQuery(query);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    // Trigger query via URL parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('query', inputValue);
-    window.history.pushState({}, '', url);
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    // Trigger query via ref
+    chatRef.current?.submitQuery(inputValue);
 
     // Clear input
     setInputValue('');
@@ -61,7 +56,7 @@ export function InteractiveChatWithFloatingInput() {
       `}</style>
 
       <div className="floating-input-wrapper h-full">
-        <InteractiveChat persona={currentPersona} />
+        <InteractiveChat ref={chatRef} persona={currentPersona} />
       </div>
 
       {/* Floating Input Bar */}
