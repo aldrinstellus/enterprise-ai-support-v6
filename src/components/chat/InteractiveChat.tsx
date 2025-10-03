@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Send, Sparkles, PanelLeft, PanelLeftClose, Copy, Check, RotateCw, ThumbsUp, ThumbsDown, Download } from 'lucide-react';
 import { findBestMatch } from '@/lib/c-level-conversation';
 import { WidgetRenderer } from './WidgetRenderer';
@@ -35,6 +36,7 @@ export function InteractiveChat() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { quickActionQuery } = useQuickAction();
   const { sidebarOpen, toggleSidebar } = useSidebar();
+  const searchParams = useSearchParams();
 
   // Detect if user is at bottom of scroll container
   useEffect(() => {
@@ -67,6 +69,19 @@ export function InteractiveChat() {
       }, 100);
     }
   }, [quickActionQuery]);
+
+  // Handle URL query parameter (from dashboard widget clicks)
+  useEffect(() => {
+    const query = searchParams.get('query');
+    if (query) {
+      setInputValue(query);
+      // Auto-submit after setting the value
+      setTimeout(() => {
+        const form = inputRef.current?.closest('form');
+        form?.requestSubmit();
+      }, 100);
+    }
+  }, [searchParams]);
 
   // Simulate realistic AI response with two-phase animation
   const simulateAIResponse = async (text: string): Promise<void> => {

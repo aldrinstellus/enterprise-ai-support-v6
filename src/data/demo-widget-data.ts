@@ -1938,3 +1938,32 @@ Customer Success Manager`,
     meetingDuration: '30 minutes',
   },
 };
+
+// Helper function to get demo data for each widget type
+export function getWidgetDemoData(widgetType: string): any {
+  const dataMap: Record<string, any> = {
+    'executive-summary': executiveSummaryDemo,
+    'customer-risk-profile': customerRiskProfileDemo,
+    'customer-risk-list': customerRiskListDemo,
+    'ticket-detail': ticketDetailDemo,
+    'ticket-list': ticketListDemo,
+    'similar-tickets-analysis': similarTicketsAnalysisDemo,
+    'sla-performance-chart': slaPerformanceChartDemo,
+    'agent-performance-stats': agentPerformanceStatsDemo,
+    'agent-performance-comparison': agentPerformanceComparisonDemo,
+    'agent-dashboard': agentDashboardDemo,
+    'team-workload-dashboard': teamWorkloadDashboardDemo,
+    'call-prep-notes': callPrepNotesDemo,
+    'response-composer': responseComposerDemo,
+    'message-composer': messageComposerDemo,
+    'meeting-scheduler': meetingSchedulerDemo,
+    'knowledge-base-search': knowledgeBaseSearchDemo,
+    'knowledge-article': knowledgeArticleDemo,
+    'analytics-dashboard': executiveSummaryDemo, // Reuse executive summary for now
+    'escalation-path': ticketListDemo, // Reuse ticket list for now
+    'sentiment-analysis': customerRiskProfileDemo, // Reuse customer risk for now
+    'meeting-confirmation': meetingSchedulerDemo, // Reuse meeting scheduler for now
+  };
+
+  return dataMap[widgetType] || {};
+}
