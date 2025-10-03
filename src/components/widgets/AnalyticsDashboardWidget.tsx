@@ -54,7 +54,7 @@ export function AnalyticsDashboardWidget({ data }: { data: AnalyticsDashboardDat
               />
               <Bar
                 dataKey="tickets"
-                fill="hsl(var(--chart-1))"
+                fill="var(--chart-1)"
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>
@@ -85,9 +85,9 @@ export function AnalyticsDashboardWidget({ data }: { data: AnalyticsDashboardDat
               <Line
                 type="monotone"
                 dataKey="avgMinutes"
-                stroke="hsl(var(--chart-1))"
+                stroke="var(--chart-1)"
                 strokeWidth={2}
-                dot={{ fill: 'hsl(var(--chart-1))' }}
+                dot={{ fill: 'var(--chart-1)' }}
               />
             </LineChart>
           </ResponsiveContainer>

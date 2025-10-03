@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.0.1] - 2025-10-03
+
+### 🐛 Bug Fixes
+
+#### **Analytics Dashboard Chart Colors**
+- ✅ Fixed `AnalyticsDashboardWidget` chart rendering issue
+- ✅ Removed incorrect `hsl()` wrappers from Recharts components
+- ✅ Charts now use direct CSS variable references (`var(--chart-1)`)
+- **Impact**: Bar and line charts now display in proper blue theme colors instead of black
+- **Files Modified**: `src/components/widgets/AnalyticsDashboardWidget.tsx`
+
+**Technical Details**:
+- Issue: OKLCH color variables were wrapped in `hsl()` causing invalid CSS
+- Before: `fill="hsl(var(--chart-1))"` → rendered as black
+- After: `fill="var(--chart-1)"` → renders as blue (oklch(0.7049 0.1867 47.6044))
+- Affected 3 lines: Bar fill, Line stroke, Line dot fill
+
+---
+
+### ✨ Enhancements
+
+#### **AI Response Animations**
+- ✅ Implemented two-phase AI response animation
+  - Phase 1: "Thinking" state (1.5-2s)
+  - Phase 2: "Composing" state (1.5-2.5s)
+- ✅ Added word-by-word typewriter effect for AI messages
+- ✅ Enhanced state tracking for typing animations
+- **Impact**: More realistic and engaging AI interaction experience
+- **Files Modified**: `src/components/chat/InteractiveChat.tsx`
+
+**Technical Details**:
+- New states: `isThinking`, `isComposing`, `typingMessageId`, `displayedText`
+- Typewriter speed: ~10-12 words per second (85ms per word)
+- Maintains backward compatibility with existing `isTyping` state
+
+---
+
+### 📝 Documentation
+
+#### **Added User Reference Documentation**
+- ✅ Created `User QNA.md` with Bhanu's 10 C-Level Q&A pairs
+- Reference list for testing interactive demo scenarios
+
+---
+
 ## [3.0.0] - 2025-10-01
 
 ### 🚀 V3 Release - Fresh Clone from V2

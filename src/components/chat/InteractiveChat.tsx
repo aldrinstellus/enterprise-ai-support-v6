@@ -17,12 +17,17 @@ interface Message {
   timestamp: Date;
   feedback?: 'like' | 'dislike';
   userQuery?: string; // Store the original query for regeneration
+  isTyping?: boolean; // Track if this message is currently being typed
 }
 
 export function InteractiveChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
+  const [isTyping, setIsTyping] = useState(false); // Keep for backward compatibility
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+  const [displayedText, setDisplayedText] = useState<Record<string, string>>({});
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -63,13 +68,46 @@ export function InteractiveChat() {
     }
   }, [quickActionQuery]);
 
-  // Simulate typing animation for AI responses
-  const simulateTyping = async (text: string): Promise<void> => {
-    setIsTyping(true);
-    // Simulate realistic typing delay (30-50ms per character)
-    const delay = Math.min(1500, text.length * 35);
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    setIsTyping(false);
+  // Simulate realistic AI response with two-phase animation
+  const simulateAIResponse = async (text: string): Promise<void> => {
+    // Phase 1: Thinking (analyzing the query)
+    setIsThinking(true);
+    const thinkingDelay = 1500 + Math.random() * 500; // 1.5-2s
+    await new Promise((resolve) => setTimeout(resolve, thinkingDelay));
+    setIsThinking(false);
+
+    // Phase 2: Composing (writing the response)
+    setIsComposing(true);
+    const composingDelay = 1500 + Math.random() * 1000; // 1.5-2.5s
+    await new Promise((resolve) => setTimeout(resolve, composingDelay));
+    setIsComposing(false);
+  };
+
+  // Typewriter effect - reveals text word by word
+  const typewriterEffect = async (text: string, messageId: string): Promise<void> => {
+    setTypingMessageId(messageId);
+
+    // Split by words for smoother demo experience
+    const words = text.split(' ');
+    let currentText = '';
+
+    for (let i = 0; i < words.length; i++) {
+      currentText += (i > 0 ? ' ' : '') + words[i];
+      setDisplayedText(prev => ({ ...prev, [messageId]: currentText }));
+
+      // Speed: ~10-12 words per second (80-100ms per word)
+      await new Promise(resolve => setTimeout(resolve, 85));
+    }
+
+    // Clear typing state
+    setTypingMessageId(null);
+
+    // Mark message as fully typed
+    setMessages(prev =>
+      prev.map(msg =>
+        msg.id === messageId ? { ...msg, isTyping: false } : msg
+      )
+    );
   };
 
   // Action handlers
@@ -119,17 +157,25 @@ export function InteractiveChat() {
 
   // Helper to handle matched responses
   const handleMatch = async (match: any, query: string) => {
-    await simulateTyping(match.aiResponse);
+    // Phase 1 & 2: Thinking and Composing animations
+    await simulateAIResponse(match.aiResponse);
 
+    // Create message with isTyping flag
+    const messageId = `ai-${Date.now()}`;
     const aiMessage: Message = {
-      id: `ai-${Date.now()}`,
+      id: messageId,
       type: 'ai',
       content: match.aiResponse,
       timestamp: new Date(),
       userQuery: query,
+      isTyping: true,
     };
     setMessages((prev) => [...prev, aiMessage]);
 
+    // Phase 3: Typewriter effect - reveal text word by word
+    await typewriterEffect(match.aiResponse, messageId);
+
+    // Show widget after typing completes
     if (match.widgetType && match.widgetData) {
       await new Promise((resolve) => setTimeout(resolve, 400));
       const widgetMessage: Message = {
@@ -166,7 +212,7 @@ export function InteractiveChat() {
       await handleMatch(match, query);
     } else {
       // No match found - helpful response
-      await simulateTyping('I can help with that.');
+      await simulateAIResponse('I can help with that.');
       const fallbackMessage: Message = {
         id: `ai-${Date.now()}`,
         type: 'ai',
@@ -200,7 +246,7 @@ export function InteractiveChat() {
       {/* Messages Container */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-3xl mx-auto">
-          {messages.length === 0 && !isTyping && (
+          {messages.length === 0 && !isThinking && !isComposing && (
             <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center">
               <h1 className="text-4xl md:text-5xl font-medium text-foreground mb-3">
                 AI that <span className="italic">actually</span> gets work done
@@ -237,7 +283,7 @@ export function InteractiveChat() {
                 )}
 
                 {message.type === 'ai' && (
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary via-chart-3 to-primary/80 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
@@ -246,12 +292,18 @@ export function InteractiveChat() {
                         {/* Message Content */}
                         <div className="px-4 py-3">
                           <p className="text-sm whitespace-pre-wrap text-foreground">
-                            {message.content}
+                            {message.isTyping && typingMessageId === message.id
+                              ? displayedText[message.id] || ''
+                              : message.content}
+                            {message.isTyping && typingMessageId === message.id && (
+                              <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse" />
+                            )}
                           </p>
                         </div>
 
-                        {/* Action Bar Footer */}
-                        <div className="flex items-center gap-2 px-4 py-2 bg-background/40 border-t border-primary/10">
+                        {/* Action Bar Footer - Only show when typing is complete */}
+                        {!message.isTyping && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-background/40 border-t border-primary/10 animate-in fade-in duration-300 delay-150">
                         <button
                           onClick={() => handleCopy(message.id, message.content!)}
                           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -322,6 +374,7 @@ export function InteractiveChat() {
                           })}
                         </span>
                       </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -341,22 +394,35 @@ export function InteractiveChat() {
               </div>
             ))}
 
-            {isTyping && (
+            {/* Phase 1: Thinking Indicator */}
+            {isThinking && (
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary via-chart-3 to-primary/80 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20 animate-pulse">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex items-center gap-2 px-4 py-3">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                  <span className="text-sm text-muted-foreground italic animate-pulse">
+                    Analyzing your question...
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Phase 2: Composing Indicator */}
+            {isComposing && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary via-chart-3 to-primary/80 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                <div className="bg-gradient-to-br from-primary/8 via-accent/15 to-chart-3/10 px-4 py-3 rounded-2xl rounded-tl-sm border border-primary/25 shadow-md">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
-                    <div
-                      className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    />
-                    <div
-                      className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                      style={{ animationDelay: '0.4s' }}
-                    />
+                <div className="bg-gradient-to-br from-primary/8 via-accent/15 to-chart-3/10 rounded-2xl border border-primary/25 shadow-md overflow-hidden animate-in fade-in duration-300">
+                  <div className="px-4 py-3">
+                    {/* Skeleton lines with shimmer effect */}
+                    <div className="space-y-2">
+                      <div className="h-3 bg-primary/20 rounded animate-pulse w-full" />
+                      <div className="h-3 bg-primary/20 rounded animate-pulse w-5/6" />
+                      <div className="h-3 bg-primary/20 rounded animate-pulse w-4/6" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -378,11 +444,11 @@ export function InteractiveChat() {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="What would you like to do?"
               className="flex-1 px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              disabled={isTyping}
+              disabled={isThinking || isComposing}
             />
             <button
               type="submit"
-              disabled={!inputValue.trim() || isTyping}
+              disabled={!inputValue.trim() || isThinking || isComposing}
               className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               Send
