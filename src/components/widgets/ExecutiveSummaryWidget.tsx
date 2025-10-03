@@ -9,6 +9,25 @@ import {
 import type { ExecutiveSummaryData } from '@/types/widget';
 
 export function ExecutiveSummaryWidget({ data }: { data: ExecutiveSummaryData }) {
+  // Defensive check for malformed data
+  if (!data || typeof data !== 'object') {
+    console.error('[ExecutiveSummaryWidget] Invalid data received:', data);
+    return (
+      <div className="my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+        <p className="text-sm text-destructive">Unable to load executive summary: Invalid data</p>
+      </div>
+    );
+  }
+
+  if (!data.sections || !Array.isArray(data.sections)) {
+    console.error('[ExecutiveSummaryWidget] Missing or invalid sections:', data);
+    return (
+      <div className="my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+        <p className="text-sm text-destructive">Unable to load executive summary: Missing sections data</p>
+      </div>
+    );
+  }
+
   const statusIcons = {
     success: CheckCircle2,
     warning: AlertTriangle,
@@ -89,7 +108,7 @@ export function ExecutiveSummaryWidget({ data }: { data: ExecutiveSummaryData })
       </div>
 
       {/* Key Insights */}
-      {data.keyInsights.length > 0 && (
+      {data.keyInsights && Array.isArray(data.keyInsights) && data.keyInsights.length > 0 && (
         <div className="glass-card rounded-lg border border-border bg-card/70 p-4 backdrop-blur-md">
           <h4 className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground">
             <Activity className="h-4 w-4 text-primary" />
@@ -107,7 +126,7 @@ export function ExecutiveSummaryWidget({ data }: { data: ExecutiveSummaryData })
       )}
 
       {/* Recommended Actions */}
-      {data.recommendedActions.length > 0 && (
+      {data.recommendedActions && Array.isArray(data.recommendedActions) && data.recommendedActions.length > 0 && (
         <div className="glass-card rounded-lg border border-border bg-card/70 p-4 backdrop-blur-md">
           <h4 className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground">
             <AlertCircle className="h-4 w-4 text-primary" />
