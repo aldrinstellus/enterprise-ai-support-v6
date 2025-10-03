@@ -64,7 +64,7 @@ export function WidgetRenderer({ type, data, onAction }: WidgetRendererProps) {
       return <CallPrepNotesWidget data={data as any} />;
 
     case 'response-composer':
-      return <ResponseComposerWidget data={data as any} />;
+      return <ResponseComposerWidget data={data as any} onAction={onAction} />;
 
     case 'similar-tickets-analysis':
       return <SimilarTicketsAnalysisWidget data={data as any} />;

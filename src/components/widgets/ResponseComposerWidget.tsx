@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import type { ResponseComposerData } from '@/types/widget';
 
-export function ResponseComposerWidget({ data }: { data: ResponseComposerData }) {
+export function ResponseComposerWidget({ data, onAction }: { data: ResponseComposerData; onAction?: (action: string) => void }) {
   const priorityColors = {
     critical: 'border-destructive/30 bg-destructive/10 text-destructive',
     high: 'border-chart-4/30 bg-chart-4/10 text-chart-4',
@@ -148,22 +148,6 @@ export function ResponseComposerWidget({ data }: { data: ResponseComposerData })
             {data.aiGeneratedResponse.estimatedSentiment}
           </span>
         </div>
-
-        {/* Action Buttons (Placeholder) */}
-        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border/50">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium">
-            <Send className="h-4 w-4" />
-            Send Response
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm font-medium text-foreground">
-            <FileText className="h-4 w-4" />
-            Edit & Customize
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm font-medium text-foreground">
-            <Sparkles className="h-4 w-4" />
-            Regenerate
-          </button>
-        </div>
       </div>
 
       {/* Template Options */}
@@ -264,6 +248,31 @@ export function ResponseComposerWidget({ data }: { data: ResponseComposerData })
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 pt-2">
+        <button
+          onClick={() => onAction?.('send the response')}
+          className="flex items-center gap-2 text-sm text-primary-foreground bg-primary hover:bg-primary/90 font-medium px-6 py-2.5 rounded shadow-sm hover:shadow transition-all"
+        >
+          <Send className="h-4 w-4" />
+          Send Response
+        </button>
+        <button
+          onClick={() => onAction?.('edit and customize')}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium px-4 py-2.5 rounded bg-muted/20 hover:bg-muted/30 border border-border hover:border-border/80 transition-all"
+        >
+          <FileText className="h-4 w-4" />
+          Edit & Customize
+        </button>
+        <button
+          onClick={() => onAction?.('regenerate response')}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-medium px-4 py-2.5 rounded bg-muted/20 hover:bg-muted/30 border border-border hover:border-border/80 transition-all"
+        >
+          <Sparkles className="h-4 w-4" />
+          Regenerate
+        </button>
       </div>
     </div>
   );

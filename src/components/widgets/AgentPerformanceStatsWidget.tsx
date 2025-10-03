@@ -35,7 +35,7 @@ export function AgentPerformanceStatsWidget({ data }: { data: AgentPerformanceSt
             {data.title}
           </h4>
           <p className="text-sm text-muted-foreground mt-1">
-            {data.agentName} • {data.period}
+            {data.period}
           </p>
         </div>
       </div>
@@ -201,12 +201,10 @@ export function AgentPerformanceStatsWidget({ data }: { data: AgentPerformanceSt
           </h5>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {data.achievements.map((achievement, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded border border-border/50 bg-background/50">
-                <span className="text-2xl flex-shrink-0">{achievement.badge}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-foreground mb-0.5">{achievement.description}</p>
-                  <p className="text-xs text-muted-foreground">Earned {achievement.dateEarned}</p>
-                </div>
+              <div key={index} className="p-3 rounded border border-border/50 bg-background/50">
+                <p className="text-sm font-semibold text-foreground mb-1">{achievement.badge}</p>
+                <p className="text-xs text-muted-foreground mb-1">{achievement.description}</p>
+                <p className="text-xs text-muted-foreground">Earned {achievement.dateEarned}</p>
               </div>
             ))}
           </div>

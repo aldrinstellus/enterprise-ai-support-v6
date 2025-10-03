@@ -29,7 +29,7 @@ export function AgentDashboardWidget({ data }: { data: AgentDashboardData }) {
         <div>
           <h3 className="text-lg font-semibold text-foreground">{data.title}</h3>
           <p className="text-sm text-muted-foreground">
-            {data.agentName} • {data.date}
+            {data.date}
           </p>
         </div>
       </div>

@@ -25,8 +25,8 @@ import {
 } from '@/data/demo-widget-data';
 
 export interface QueryMatch {
-  widgetType: WidgetType;
-  widgetData: WidgetData;
+  widgetType: WidgetType | null;
+  widgetData: WidgetData | null;
   responseText: string;
 }
 
@@ -296,6 +296,31 @@ function detectManagerQuery(q: string): QueryMatch | null {
 // ============================================================================
 
 function detectAgentQuery(q: string): QueryMatch | null {
+  // Button Actions (Response Composer)
+  if (q.includes('send the response') || q.includes('send response')) {
+    return {
+      widgetType: null,
+      widgetData: null,
+      responseText: '✓ Response sent successfully! The customer will receive your message within the next few minutes.',
+    };
+  }
+
+  if (q.includes('edit and customize')) {
+    return {
+      widgetType: null,
+      widgetData: null,
+      responseText: 'Opening response editor... You can now customize the message before sending.',
+    };
+  }
+
+  if (q.includes('regenerate response')) {
+    return {
+      widgetType: null,
+      widgetData: null,
+      responseText: '✓ Regenerating response with a different approach...',
+    };
+  }
+
   // 1. Agent Dashboard (daily overview)
   if (
     q.includes("what's on my plate") ||
@@ -408,10 +433,13 @@ function detectAgentQuery(q: string): QueryMatch | null {
 
   // 9. Knowledge Article
   if (q.includes('open kb') || /kb-?\d+/.test(q)) {
+    const kbMatch = q.match(/kb-?(\d+)/i);
+    const kbId = kbMatch ? `KB-${kbMatch[1]}` : 'KB-892';
+
     return {
       widgetType: 'knowledge-article',
-      widgetData: knowledgeArticleDemo,
-      responseText: "Here's the knowledge base article:",
+      widgetData: { ...knowledgeArticleDemo, id: kbId },
+      responseText: `Here's ${kbId}:`,
     };
   }
 
