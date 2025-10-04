@@ -7,6 +7,7 @@ import { detectWidgetQuery, type PersonaId } from '@/lib/query-detection';
 import { WidgetRenderer } from '@/components/widgets/WidgetRenderer';
 import { useQuickAction } from '@/contexts/QuickActionContext';
 import { useSidebar } from '@/contexts/SidebarContext';
+import { useConversation } from '@/contexts/ConversationContext';
 import { Avatar } from '@/components/ui/Avatar';
 import type { Persona } from '@/types/persona';
 
@@ -31,8 +32,9 @@ export interface InteractiveChatRef {
 }
 
 export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatProps>(function InteractiveChat({ persona }, ref) {
-  // Per-persona message storage
-  const [messagesByPersona, setMessagesByPersona] = useState<Record<string, Message[]>>({});
+  // Use shared conversation context
+  const { messagesByPersona, setMessagesByPersona } = useConversation();
+
   const [inputValue, setInputValue] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
@@ -55,7 +57,16 @@ export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatPro
   useEffect(() => {
     console.log('[InteractiveChat] Persona changed to:', personaId);
     console.log('[InteractiveChat] All messages by persona:', messagesByPersona);
-    console.log('[InteractiveChat] Current persona messages:', messagesByPersona[personaId] || []);
+    console.log('[InteractiveChat] Current persona messages count:', (messagesByPersona[personaId] || []).length);
+  }, [personaId, messagesByPersona]);
+
+  // Scroll to top when switching to a persona with no messages
+  useEffect(() => {
+    const currentMessages = messagesByPersona[personaId] || [];
+    if (currentMessages.length === 0 && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = 0;
+      console.log('[InteractiveChat] Scrolled to top (no messages for this persona)');
+    }
   }, [personaId, messagesByPersona]);
 
   // Get current persona's messages
@@ -66,6 +77,7 @@ export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatPro
     setMessagesByPersona(prev => {
       const currentMessages = prev[personaId] || [];
       const newMessages = typeof updater === 'function' ? updater(currentMessages) : updater;
+      console.log('[InteractiveChat] Updating messages for persona:', personaId, 'New count:', newMessages.length);
       return { ...prev, [personaId]: newMessages };
     });
   }, [personaId]);
@@ -327,7 +339,7 @@ export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatPro
             {messages.map((message) => (
               <div key={message.id}>
                 {message.type === 'user' && (
-                  <div className="flex gap-3 justify-end">
+                  <div className="flex gap-3 justify-end" data-message-role="user">
                     <div className="max-w-2xl">
                       <div className="bg-primary text-primary-foreground px-4 py-3 rounded-2xl rounded-tr-sm">
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -348,7 +360,7 @@ export const InteractiveChat = forwardRef<InteractiveChatRef, InteractiveChatPro
                 )}
 
                 {message.type === 'ai' && (
-                  <div className="flex gap-3 animate-in fade-in slide-in-from-left-2 duration-500">
+                  <div className="flex gap-3 animate-in fade-in slide-in-from-left-2 duration-500" data-message-role="ai">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary via-chart-3 to-primary/80 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>

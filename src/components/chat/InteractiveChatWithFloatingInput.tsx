@@ -69,11 +69,13 @@ export function InteractiveChatWithFloatingInput() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="What would you like to do?"
+            data-testid="chat-input"
             className="w-full pl-6 pr-14 py-4 bg-card/90 backdrop-blur-xl border border-border/50 rounded-full text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-xl transition-all"
           />
           <button
             type="submit"
             disabled={!inputValue.trim()}
+            data-testid="send-button"
             className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
           >
             <Send className="w-4 h-4" />

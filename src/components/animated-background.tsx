@@ -33,7 +33,6 @@ const BACKGROUND_IMAGES = [
 
 export function AnimatedBackground() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     // Rotate images every 15 seconds (50% longer)
@@ -62,13 +61,12 @@ export function AnimatedBackground() {
           }}
           className="absolute inset-0"
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={BACKGROUND_IMAGES[currentImageIndex].url}
             alt={BACKGROUND_IMAGES[currentImageIndex].alt}
             className="h-full w-full object-cover"
             loading="eager"
-            onError={() => setImageError(true)}
-            onLoad={() => setImageError(false)}
           />
         </motion.div>
       </AnimatePresence>

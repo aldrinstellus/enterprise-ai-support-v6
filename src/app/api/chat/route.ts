@@ -2783,7 +2783,7 @@ export async function POST(req: NextRequest) {
               const marker = hasDashboard ? 'DASHBOARD_DATA:' : 'EXECUTION_RESULT:';
               const markerIndex = demoResponse.indexOf(marker);
               const textBeforeMarker = demoResponse.substring(0, markerIndex);
-              const markerAndAfter = demoResponse.substring(markerIndex);
+              // markerAndAfter extracted but not used in streaming - data sent separately
 
               // Stream ONLY the text before the marker with typewriter effect
               const CHARS_PER_CHUNK = 3;

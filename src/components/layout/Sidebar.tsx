@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { usePersona } from '@/hooks/use-persona';
+import { useConversation } from '@/contexts/ConversationContext';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -25,7 +26,16 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const { currentPersona, setPersona, availablePersonas } = usePersona();
+  const { messagesByPersona } = useConversation();
   const [personaSelectorOpen, setPersonaSelectorOpen] = useState(false);
+
+  // Get current persona's message count
+  const currentMessages = messagesByPersona[currentPersona.id] || [];
+  const messageCount = currentMessages.length;
+
+  // Get first user message as preview (if exists)
+  const firstUserMessage = currentMessages.find(msg => msg.type === 'user');
+  const conversationPreview = firstUserMessage?.content?.substring(0, 50) || null;
 
   const quickActions = [
     {
@@ -109,9 +119,25 @@ export function Sidebar({
           </svg>
           Recent Conversations
         </div>
-        <div className="text-xs text-muted-foreground/60 py-4 text-center">
-          No conversations yet
-        </div>
+        {messageCount === 0 ? (
+          <div className="text-xs text-muted-foreground/60 py-4 text-center">
+            No conversations yet
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="rounded-lg border border-border/50 bg-background/50 p-3">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <span className="text-xs font-medium text-foreground">Current Session</span>
+                <span className="text-xs text-muted-foreground">{messageCount} msgs</span>
+              </div>
+              {conversationPreview && (
+                <p className="text-xs text-muted-foreground/80 truncate">
+                  {conversationPreview}{conversationPreview.length >= 50 ? '...' : ''}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -242,6 +268,8 @@ export function Sidebar({
                       onClick={() => {
                         setPersona(persona.id);
                         setPersonaSelectorOpen(false);
+                        // Navigate to persona's URL
+                        window.location.href = `/demo/${persona.id}`;
                       }}
                       className={`w-full p-3 relative transition-colors ${
                         isActive ? 'bg-primary/10' : 'hover:bg-muted'

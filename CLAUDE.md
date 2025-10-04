@@ -10,6 +10,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Port**: 3004
 **Status**: Production-ready demo with Claude SDK integration
 
+## Application URLs
+
+**IMPORTANT**: Always use the `/demo/` routes - these are the main application pages.
+
+**Development Server**: http://localhost:3004
+
+**Demo Pages** (Main Application):
+- **C-Level Executive**: http://localhost:3004/demo/c-level
+- **CS Manager**: http://localhost:3004/demo/cs-manager
+- **Support Agent**: http://localhost:3004/demo/support-agent
+
+**Note**: The root URL (http://localhost:3004) may redirect or show a landing page. All functionality is in the `/demo/` routes.
+
 ## Development Commands
 
 ### Core Development

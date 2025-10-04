@@ -39,7 +39,6 @@ import {
   MoreVertical,
   Pin,
   Archive,
-  Tag,
   Share2,
   Download,
   Edit2,
@@ -90,7 +89,6 @@ import type { PersonaType } from '@/types/persona';
 import type { WidgetType, WidgetData } from '@/types/widget';
 import { WidgetRenderer } from '@/components/widgets/WidgetRenderer';
 import { WidgetSkeleton } from '@/components/widgets/WidgetSkeleton';
-import { executiveSummaryDemo } from '@/data/demo-widget-data';
 import { detectWidgetQuery, type PersonaId } from '@/lib/query-detection';
 
 interface Message {
@@ -169,7 +167,7 @@ interface Conversation {
 
 export default function Home() {
   // Persona management
-  const { currentPersona, setPersona, availablePersonas, isTransitioning } = usePersona();
+  const { currentPersona, setPersona, availablePersonas } = usePersona();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -292,7 +290,7 @@ export default function Home() {
     } else {
       setSavedQueries([]);
     }
-  }, [currentPersona.id]);
+  }, [currentPersona.id, getSavedQueriesKey]);
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
@@ -308,7 +306,7 @@ export default function Home() {
       const key = getSavedQueriesKey();
       localStorage.setItem(key, JSON.stringify(savedQueries));
     }
-  }, [savedQueries, currentPersona.id]);
+  }, [savedQueries, currentPersona.id, getSavedQueriesKey]);
 
   // Save sidebar state to localStorage
   useEffect(() => {
@@ -581,7 +579,7 @@ export default function Home() {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [messages]);
+  }, [messages, saveCurrentConversation]);
 
   const handleSendMessage = async (prompt?: string) => {
     const messageText = prompt || input;
@@ -1532,7 +1530,6 @@ function ConversationCard({
   onDelete,
 }: ConversationCardProps) {
   const personaBadge = availablePersonas.find((p) => p.id === conv.personaId);
-  const BadgeIcon = personaBadge?.badge.icon || Shield;
   const isMenuOpen = conversationMenuOpen === conv.id;
   const isRenaming = renamingConversation === conv.id;
 

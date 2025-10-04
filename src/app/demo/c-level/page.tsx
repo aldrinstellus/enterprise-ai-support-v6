@@ -1,22 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { InteractiveChatWithFloatingInput } from '@/components/chat/InteractiveChatWithFloatingInput';
-import { QuickActionProvider } from '@/contexts/QuickActionContext';
-import { SidebarProvider } from '@/contexts/SidebarContext';
+import { usePersona } from '@/hooks/use-persona';
 
 export default function CLevelDemoPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { setPersona } = usePersona();
 
-  const toggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
-  };
+  useEffect(() => {
+    setPersona('c-level');
+  }, [setPersona]);
 
-  return (
-    <QuickActionProvider>
-      <SidebarProvider value={{ sidebarOpen, toggleSidebar }}>
-        <InteractiveChatWithFloatingInput />
-      </SidebarProvider>
-    </QuickActionProvider>
-  );
+  return <InteractiveChatWithFloatingInput />;
 }

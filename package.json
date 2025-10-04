@@ -14,7 +14,14 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:c-level": "playwright test tests/e2e/personas/c-level.spec.ts",
+    "test:e2e:cs-manager": "playwright test tests/e2e/personas/cs-manager.spec.ts",
+    "test:e2e:support-agent": "playwright test tests/e2e/personas/support-agent.spec.ts",
+    "test:e2e:report": "playwright show-report tests/reports/playwright-report"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
@@ -42,6 +49,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.55.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
