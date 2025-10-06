@@ -3195,6 +3195,9 @@ EXECUTION_RESULT:
                 // Track list_zoho_tickets data for widget rendering
                 if (toolUse.name === 'list_zoho_tickets' && result.tickets) {
                   zohoTicketsData = result;
+                } else if (toolUse.name === 'get_ticket_detail' && result.ticket) {
+                  // Wrap single ticket in array format for widget rendering
+                  zohoTicketsData = { tickets: [result.ticket], total: 1 };
                 }
 
                 toolResults.push({
