@@ -1,5 +1,8 @@
 import type { WidgetType, WidgetData } from '@/types/widget';
 import { ExecutiveSummaryWidget } from './ExecutiveSummaryWidget';
+import { AnalyticsDashboardWidget } from './AnalyticsDashboardWidget';
+import { PerformanceTrendsWidget } from './PerformanceTrendsWidget';
+import { SentimentAnalysisWidget } from './SentimentAnalysisWidget';
 import { CustomerRiskProfileWidget } from './CustomerRiskProfileWidget';
 import { TicketListWidget } from './TicketListWidget';
 import { AgentDashboardWidget } from './AgentDashboardWidget';
@@ -30,6 +33,15 @@ export function WidgetRenderer({ type, data, onAction }: WidgetRendererProps) {
     switch (type) {
       case 'executive-summary':
         return <ExecutiveSummaryWidget data={data as any} />;
+
+      case 'analytics-dashboard':
+        return <AnalyticsDashboardWidget data={data as any} />;
+
+      case 'performance-trends':
+        return <PerformanceTrendsWidget data={data as any} />;
+
+      case 'sentiment-analysis':
+        return <SentimentAnalysisWidget data={data as any} />;
 
       case 'customer-risk-profile':
         return <CustomerRiskProfileWidget data={data as any} />;

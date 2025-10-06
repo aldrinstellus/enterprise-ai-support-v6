@@ -3,6 +3,9 @@
 
 import type {
   ExecutiveSummaryData,
+  AnalyticsDashboardData,
+  PerformanceTrendsData,
+  SentimentAnalysisData,
   CustomerRiskProfileData,
   TicketDetailData,
   SLAPerformanceChartData,
@@ -74,6 +77,73 @@ export const executiveSummaryDemo: ExecutiveSummaryData = {
       priority: 'high',
       action: 'Review engineering escalation trends with Product team',
       reason: '15% increase suggests systemic issues',
+    },
+  ],
+};
+
+// C-Level: Analytics Dashboard Widget Data (with Recharts visualization)
+export const analyticsDashboardDemo: AnalyticsDashboardData = {
+  ticketVolume: [
+    { date: "Dec 13", tickets: 45 },
+    { date: "Dec 14", tickets: 52 },
+    { date: "Dec 15", tickets: 38 },
+    { date: "Dec 16", tickets: 61 },
+    { date: "Dec 17", tickets: 55 },
+    { date: "Dec 18", tickets: 48 },
+    { date: "Dec 19", tickets: 58 }
+  ],
+  responseTime: [
+    { hour: "9am", avgMinutes: 12 },
+    { hour: "11am", avgMinutes: 18 },
+    { hour: "1pm", avgMinutes: 25 },
+    { hour: "3pm", avgMinutes: 22 },
+    { hour: "5pm", avgMinutes: 15 }
+  ],
+  resolution: {
+    resolved: 142,
+    pending: 38,
+    escalated: 12
+  }
+};
+
+// C-Level/Manager: Performance Trends Widget Data (Multi-line chart)
+export const performanceTrendsDemo: PerformanceTrendsData = {
+  period: 'Last 7 Days',
+  metrics: [
+    { date: 'Dec 13', responseTime: 3.2, resolutionTime: 18.5, satisfaction: 87 },
+    { date: 'Dec 14', responseTime: 3.8, resolutionTime: 20.1, satisfaction: 85 },
+    { date: 'Dec 15', responseTime: 2.9, resolutionTime: 16.8, satisfaction: 89 },
+    { date: 'Dec 16', responseTime: 4.5, resolutionTime: 22.3, satisfaction: 82 },
+    { date: 'Dec 17', responseTime: 3.5, resolutionTime: 19.2, satisfaction: 86 },
+    { date: 'Dec 18', responseTime: 3.1, resolutionTime: 17.9, satisfaction: 88 },
+    { date: 'Dec 19', responseTime: 4.2, resolutionTime: 21.5, satisfaction: 84 },
+  ],
+};
+
+// C-Level: Sentiment Analysis Widget Data
+export const sentimentAnalysisDemo: SentimentAnalysisData = {
+  overall: 'negative',
+  score: 45,
+  breakdown: {
+    positive: 20,
+    neutral: 35,
+    negative: 45,
+  },
+  recentComments: [
+    {
+      text: 'Authentication issues are causing major disruptions to our workflow',
+      sentiment: 'negative',
+      timestamp: '2 hours ago',
+    },
+    {
+      text: 'Data export feature is still not working properly',
+      sentiment: 'negative',
+      timestamp: '5 hours ago',
+    },
+    {
+      text: 'API rate limiting is affecting our integration',
+      sentiment: 'negative',
+      timestamp: '1 day ago',
     },
   ],
 };
@@ -1943,6 +2013,9 @@ Customer Success Manager`,
 export function getWidgetDemoData(widgetType: string): any {
   const dataMap: Record<string, any> = {
     'executive-summary': executiveSummaryDemo,
+    'analytics-dashboard': analyticsDashboardDemo,
+    'performance-trends': performanceTrendsDemo,
+    'sentiment-analysis': sentimentAnalysisDemo,
     'customer-risk-profile': customerRiskProfileDemo,
     'customer-risk-list': customerRiskListDemo,
     'ticket-detail': ticketDetailDemo,
@@ -1959,9 +2032,7 @@ export function getWidgetDemoData(widgetType: string): any {
     'meeting-scheduler': meetingSchedulerDemo,
     'knowledge-base-search': knowledgeBaseSearchDemo,
     'knowledge-article': knowledgeArticleDemo,
-    'analytics-dashboard': executiveSummaryDemo, // Reuse executive summary for now
     'escalation-path': ticketListDemo, // Reuse ticket list for now
-    'sentiment-analysis': customerRiskProfileDemo, // Reuse customer risk for now
     'meeting-confirmation': meetingSchedulerDemo, // Reuse meeting scheduler for now
   };
 

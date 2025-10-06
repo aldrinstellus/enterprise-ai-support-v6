@@ -532,6 +532,86 @@ export const conversationEntries: ConversationEntry[] = [
       ],
     },
   },
+
+  // NEW Q&A #1: Performance Trends
+  {
+    id: 'q6-performance-trends',
+    triggers: ['performance trends', 'team performance', 'performance over time', 'metrics trends', 'response time trends'],
+    userQuery: 'Show me our performance trends over the last week',
+    aiResponse: "Here's a comprehensive view of your team's performance trends over the last 7 days, including response time, resolution time, and customer satisfaction metrics:",
+    widgetType: 'performance-trends',
+    widgetData: {
+      period: 'Last 7 Days',
+      metrics: [
+        { date: 'Dec 13', responseTime: 3.2, resolutionTime: 18.5, satisfaction: 87 },
+        { date: 'Dec 14', responseTime: 3.8, resolutionTime: 20.1, satisfaction: 85 },
+        { date: 'Dec 15', responseTime: 2.9, resolutionTime: 16.8, satisfaction: 89 },
+        { date: 'Dec 16', responseTime: 4.5, resolutionTime: 22.3, satisfaction: 82 },
+        { date: 'Dec 17', responseTime: 3.5, resolutionTime: 19.2, satisfaction: 86 },
+        { date: 'Dec 18', responseTime: 3.1, resolutionTime: 17.9, satisfaction: 88 },
+        { date: 'Dec 19', responseTime: 4.2, resolutionTime: 21.5, satisfaction: 84 },
+      ],
+    },
+  },
+
+  // NEW Q&A #2: Sentiment Analysis
+  {
+    id: 'q7-sentiment-analysis',
+    triggers: ['sentiment', 'customer sentiment', 'feedback', 'customer feedback', 'sentiment analysis', 'how are customers feeling'],
+    userQuery: 'What is the current customer sentiment?',
+    aiResponse: "Based on recent customer interactions and feedback, here's the sentiment analysis. The overall sentiment is trending negative, with several recurring issues mentioned in recent communications:",
+    widgetType: 'sentiment-analysis',
+    widgetData: {
+      overall: 'negative',
+      score: 45,
+      breakdown: {
+        positive: 20,
+        neutral: 35,
+        negative: 45,
+      },
+      recentComments: [
+        {
+          text: 'Authentication issues are causing major disruptions to our workflow',
+          sentiment: 'negative',
+          timestamp: '2 hours ago',
+        },
+        {
+          text: 'Data export feature is still not working properly',
+          sentiment: 'negative',
+          timestamp: '5 hours ago',
+        },
+        {
+          text: 'API rate limiting is affecting our integration',
+          sentiment: 'negative',
+          timestamp: '1 day ago',
+        },
+      ],
+    },
+  },
+
+  // NEW Q&A #3: Combined Analytics with Performance
+  {
+    id: 'q8-detailed-analytics-performance',
+    triggers: ['detailed performance analytics', 'full analytics', 'complete dashboard', 'all metrics'],
+    userQuery: 'Show me detailed analytics with performance metrics',
+    aiResponse: "Here's your comprehensive analytics dashboard showing ticket volume, response times, and resolution statistics for the week:",
+    widgetType: 'analytics-dashboard',
+    widgetData: {
+      ticketVolume: getShortDates(7),
+      responseTime: [
+        { hour: '9am', avgMinutes: 12 },
+        { hour: '11am', avgMinutes: 18 },
+        { hour: '1pm', avgMinutes: 25 },
+        { hour: '3pm', avgMinutes: 22 },
+        { hour: '5pm', avgMinutes: 15 },
+      ],
+      resolution: {
+        resolved: 142,
+        pending: 38,
+        escalated: 12,
+      },
+    },
+  },
 ];
 
 // Pattern matching function to find the best match with scoring

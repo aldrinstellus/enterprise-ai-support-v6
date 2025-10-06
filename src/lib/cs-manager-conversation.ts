@@ -2,7 +2,17 @@
 // Multi-turn conversation flows for CS Manager persona
 
 import type { WidgetType, WidgetData } from '@/types/widget';
-import { meetingSchedulerDemo } from '@/data/demo-widget-data';
+import {
+  meetingSchedulerDemo,
+  teamWorkloadDashboardDemo,
+  agentPerformanceComparisonDemo,
+  slaPerformanceChartDemo,
+  performanceTrendsDemo,
+  customerRiskListDemo,
+  ticketListDemo,
+  sentimentAnalysisDemo,
+  analyticsDashboardDemo,
+} from '@/data/demo-widget-data';
 
 export interface ConversationEntry {
   id: string;
@@ -115,6 +125,86 @@ const conversationEntries: ConversationEntry[] = [
     triggers: ['save as template', 'save template'],
     userQuery: 'Save as template',
     aiResponse: '✓ Message saved as template "Customer Outage Response". You can reuse this template for similar customer communications in the future.',
+  },
+
+  // NEW Q&A #1: Team Workload Dashboard
+  {
+    id: 'q7-team-workload',
+    triggers: ['team workload', 'team capacity', 'workload dashboard', 'team distribution', 'agent workload'],
+    userQuery: 'Show me the current team workload distribution',
+    aiResponse: "Here's the real-time team workload dashboard. David Park is currently overloaded at 120% capacity and needs immediate support. I recommend redistributing tickets to Sarah Chen and Aisha Williams who have available capacity:",
+    widgetType: 'team-workload-dashboard',
+    widgetData: teamWorkloadDashboardDemo,
+  },
+
+  // NEW Q&A #2: Agent Performance Comparison
+  {
+    id: 'q8-agent-performance',
+    triggers: ['agent performance', 'compare agents', 'team performance', 'top performers', 'performance comparison'],
+    userQuery: 'Compare agent performance for this month',
+    aiResponse: "Here's the agent performance comparison for the last 30 days. Sarah Chen leads the team with 95% SLA compliance and 4.8 customer satisfaction. Tom Anderson may need additional support and coaching:",
+    widgetType: 'agent-performance-comparison',
+    widgetData: agentPerformanceComparisonDemo,
+  },
+
+  // NEW Q&A #3: SLA Performance Chart
+  {
+    id: 'q9-sla-performance',
+    triggers: ['sla performance', 'sla compliance', 'sla metrics', 'sla breaches', 'service level'],
+    userQuery: 'Show me SLA performance breakdown',
+    aiResponse: "Here's the SLA performance analysis. Overall compliance is at 87%, which is below our 90% target. Critical resolution times are declining at 72% compliance - this needs immediate attention:",
+    widgetType: 'sla-performance-chart',
+    widgetData: slaPerformanceChartDemo,
+  },
+
+  // NEW Q&A #4: Performance Trends
+  {
+    id: 'q10-performance-trends',
+    triggers: ['performance trends', 'trends over time', 'weekly performance', 'performance chart'],
+    userQuery: 'Show me performance trends for the past week',
+    aiResponse: "Here's the performance trends for the last 7 days. Response times are showing some volatility, with spikes on Dec 16 and Dec 19. Customer satisfaction dipped to 82% mid-week but is recovering:",
+    widgetType: 'performance-trends',
+    widgetData: performanceTrendsDemo,
+  },
+
+  // NEW Q&A #5: Customer Risk List
+  {
+    id: 'q11-customer-risk-list',
+    triggers: ['at-risk customers', 'customer risk', 'high-risk accounts', 'customers at risk', 'risk list'],
+    userQuery: 'Show me all at-risk customers',
+    aiResponse: "Here are your 8 high-risk customers requiring immediate attention. Acme Corporation tops the list with a risk score of 92 and contract renewal in just 45 days:",
+    widgetType: 'customer-risk-list',
+    widgetData: customerRiskListDemo,
+  },
+
+  // NEW Q&A #6: Critical Tickets
+  {
+    id: 'q12-critical-tickets',
+    triggers: ['critical tickets', 'urgent tickets', 'high priority', 'tickets at risk'],
+    userQuery: 'What critical tickets need attention?',
+    aiResponse: "Here are all critical and high-priority tickets requiring immediate attention. Two tickets have already breached SLA and need escalation:",
+    widgetType: 'ticket-list',
+    widgetData: ticketListDemo,
+  },
+
+  // NEW Q&A #7: Sentiment Analysis
+  {
+    id: 'q13-sentiment-analysis',
+    triggers: ['customer sentiment', 'sentiment trends', 'how are customers feeling', 'feedback sentiment'],
+    userQuery: 'What is the overall customer sentiment?',
+    aiResponse: "Based on recent customer feedback and interactions, the overall sentiment is negative at 45%. The main pain points are authentication issues, data export problems, and API rate limiting:",
+    widgetType: 'sentiment-analysis',
+    widgetData: sentimentAnalysisDemo,
+  },
+
+  // NEW Q&A #8: Analytics Dashboard
+  {
+    id: 'q14-analytics-dashboard',
+    triggers: ['show analytics', 'analytics dashboard', 'detailed metrics', 'ticket analytics'],
+    userQuery: 'Show me the detailed analytics dashboard',
+    aiResponse: "Here's your comprehensive analytics dashboard showing ticket volume trends, response time patterns, and resolution breakdown for the week:",
+    widgetType: 'analytics-dashboard',
+    widgetData: analyticsDashboardDemo,
   },
 ];
 

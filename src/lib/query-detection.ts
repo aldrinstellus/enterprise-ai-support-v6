@@ -6,6 +6,9 @@ import { findBestMatch as findCLevelMatch } from './c-level-conversation';
 import { findBestMatch as findCSManagerMatch } from './cs-manager-conversation';
 import {
   executiveSummaryDemo,
+  analyticsDashboardDemo,
+  performanceTrendsDemo,
+  sentimentAnalysisDemo,
   customerRiskProfileDemo,
   ticketDetailDemo,
   slaPerformanceChartDemo,

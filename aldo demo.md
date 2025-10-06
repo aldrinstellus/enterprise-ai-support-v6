@@ -6,11 +6,12 @@ Perfect! Based on the pushed git history and TESTING-SUMMARY.md, here are the TE
   C-Level Executive (6 Queries - 100% PASS)
 
   1. Show me executive summary
-  2. Schedule executive call → book tomorrow at 1pm
-  3. Tell me more about Acme Corp
-  4. Show me the SLA performance breakdown
-  5. Show me high-risk customers
-  6. Show me ticket TICK-001
+  2. Show me the detailed analytics.
+  3. Schedule executive call → book tomorrow at 1pm
+  4. Tell me more about Acme Corp
+  5. Show me the SLA performance breakdown
+  6. Show me high-risk customers
+  7. Show me ticket TICK-001
 
   CS Manager (6 Queries - 100% PASS)
 
@@ -32,6 +33,24 @@ Perfect! Based on the pushed git history and TESTING-SUMMARY.md, here are the TE
   7. Show me my performance stats
   8. How do I troubleshoot authentication issues?
   9. Open KB-107
+
+
+-----------------------
+
+bhanu questions
+
+
+  📱 Bhanu's Demo App (Port 3000)
+
+  Main Pages:
+  - Landing: http://localhost:3000
+  - C-Level Executive: http://localhost:3000/demo/c-level
+  - CS Manager: http://localhost:3000/demo/cs-manager
+  - Support Agent: http://localhost:3000/demo/support-agent
+
+  Recommended Start: http://localhost:3000/demo/c-level
+
+
 
   
 

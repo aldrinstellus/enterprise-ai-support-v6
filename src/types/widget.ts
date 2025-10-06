@@ -3,6 +3,9 @@
 
 export type WidgetType =
   | 'executive-summary'
+  | 'analytics-dashboard'
+  | 'performance-trends'
+  | 'sentiment-analysis'
   | 'customer-risk-profile'
   | 'sla-performance-chart'
   | 'team-workload-dashboard'
@@ -40,6 +43,50 @@ export interface ExecutiveSummaryData {
     priority: 'critical' | 'high' | 'medium' | 'low';
     action: string;
     reason: string;
+  }>;
+}
+
+// Analytics Dashboard Widget (C-Level, CS Manager)
+export interface AnalyticsDashboardData {
+  ticketVolume: Array<{
+    date: string;
+    tickets: number;
+  }>;
+  responseTime: Array<{
+    hour: string;
+    avgMinutes: number;
+  }>;
+  resolution: {
+    resolved: number;
+    pending: number;
+    escalated: number;
+  };
+}
+
+// Performance Trends Widget (C-Level, CS Manager)
+export interface PerformanceTrendsData {
+  period: string;
+  metrics: Array<{
+    date: string;
+    responseTime: number;
+    resolutionTime: number;
+    satisfaction: number;
+  }>;
+}
+
+// Sentiment Analysis Widget (C-Level)
+export interface SentimentAnalysisData {
+  overall: 'positive' | 'neutral' | 'negative';
+  score: number;
+  breakdown: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  recentComments: Array<{
+    text: string;
+    sentiment: 'positive' | 'neutral' | 'negative';
+    timestamp: string;
   }>;
 }
 
@@ -662,6 +709,9 @@ export interface MessageComposerData {
 // Union type for all widget data
 export type WidgetData =
   | ExecutiveSummaryData
+  | AnalyticsDashboardData
+  | PerformanceTrendsData
+  | SentimentAnalysisData
   | CustomerRiskProfileData
   | TeamWorkloadDashboardData
   | SLAPerformanceChartData

@@ -7,6 +7,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] - 2025-10-06
+
+### ✨ Added - Widget Enrichment (WIP from Bhanu Reference)
+
+#### **New Widgets**
+- ✅ **PerformanceTrendsWidget** - Multi-line Recharts visualization
+  - Tracks 3 metrics over time: Response Time, Resolution Time, Customer Satisfaction
+  - Trend summary cards with improving/declining indicators
+  - Solar Dusk theme integration
+  - **File**: `src/components/widgets/PerformanceTrendsWidget.tsx`
+
+- ✅ **SentimentAnalysisWidget** - Progress bars with sentiment breakdown
+  - Overall sentiment score with dynamic icon (Smile/Meh/Frown)
+  - Progress bars for Positive/Neutral/Negative sentiment
+  - Recent comments section with sentiment-coded cards
+  - **File**: `src/components/widgets/SentimentAnalysisWidget.tsx`
+
+#### **C-Level Persona Enrichment (3 new Q&A)**
+- Added "Show me our performance trends over the last week" → performance-trends widget
+- Added "What is the current customer sentiment?" → sentiment-analysis widget
+- Added "Show me detailed analytics with performance metrics" → analytics-dashboard widget
+- **File**: `src/lib/c-level-conversation.ts` (now 13 total Q&A entries)
+
+#### **CS Manager Persona Enrichment (8 new Q&A)**
+- Added "Show me the current team workload distribution" → team-workload-dashboard
+- Added "Compare agent performance for this month" → agent-performance-comparison
+- Added "Show me SLA performance breakdown" → sla-performance-chart
+- Added "Show me performance trends for the past week" → performance-trends
+- Added "Show me all at-risk customers" → customer-risk-list
+- Added "What critical tickets need attention?" → ticket-list
+- Added "What is the overall customer sentiment?" → sentiment-analysis
+- Added "Show me the detailed analytics dashboard" → analytics-dashboard
+- **File**: `src/lib/cs-manager-conversation.ts` (now 14 total Q&A entries)
+
+#### **TypeScript Types**
+- Added `PerformanceTrendsData` interface for performance metrics
+- Added `SentimentAnalysisData` interface for sentiment analysis
+- Updated `WidgetType` union with 'performance-trends' and 'sentiment-analysis'
+- **File**: `src/types/widget.ts`
+
+#### **Demo Data**
+- Created `performanceTrendsDemo` with 7 days of mock performance data
+- Created `sentimentAnalysisDemo` with negative sentiment example
+- Updated `getWidgetDemoData()` mapping for new widgets
+- **File**: `src/data/demo-widget-data.ts`
+
+### 🐛 Fixed - Widget Data Issues
+
+- ✅ Fixed missing `widgetData` in CS Manager new Q&A entries
+  - All 8 new entries now properly reference demo data imports
+  - Prevents "Unable to load" errors in widgets
+- ✅ Added missing imports in `cs-manager-conversation.ts`
+- ✅ Updated `query-detection.ts` with new widget data imports
+
+### 📝 Documentation
+
+- ✅ Created `ENRICHMENT-SUMMARY.md` with full enrichment analysis
+  - New widgets documentation
+  - C-Level and CS Manager enrichment details
+  - Comparison with Bhanu's reference implementation
+  - Test queries and success metrics
+  - Backward compatibility verification
+
+- ✅ Added deployment documentation
+  - `DEPLOYMENT-GUIDE.md`
+  - `DEPLOYMENT-SUMMARY.md`
+  - `POST-DEPLOYMENT-TEST-CHECKLIST.md`
+
+### ⚠️ Known Issues
+
+- C-Level has duplicate Q&A ID numbering (q6, q7 used twice)
+  - Does not affect functionality (pattern matching uses triggers, not IDs)
+  - Recommend renumbering new entries to q11, q12, q13
+- Support Agent persona has no conversation file
+  - Currently relies on `query-detection.ts` fallback patterns only
+
+### 🔄 Backward Compatibility
+
+- ✅ All original 10 C-Level Q&A pairs remain intact
+- ✅ All original 6 CS Manager Q&A pairs remain intact
+- ✅ No breaking changes to existing widgets
+- ✅ Additive enrichment only
+
+---
+
 ## [4.0.1] - 2025-10-03
 
 ### 🐛 Bug Fixes
