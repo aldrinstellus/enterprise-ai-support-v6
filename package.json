@@ -1,8 +1,8 @@
 {
-  "name": "enterprise-ai-support-v3",
-  "version": "3.0.0",
+  "name": "enterprise-ai-support-v6",
+  "version": "6.0.0",
   "private": true,
-  "description": "Enterprise AI Support Dashboard V3 - Claude SDK Integration Edition",
+  "description": "Enterprise AI Support Dashboard V6 - New Features Development Branch",
   "scripts": {
     "dev": "next dev --turbopack -p 3004",
     "dev:full": "concurrently \"npm run dev:ws\" \"npm run dev\"",

@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Enterprise AI Support V4** - A Claude-style AI assistant interface with multi-persona support, intelligent widget rendering, and real-time conversation management. This is a production-ready demo forked from V3, featuring a sophisticated query detection system that dynamically renders context-specific widgets based on user questions.
+**Enterprise AI Support V6** - A Claude-style AI assistant interface with multi-persona support, intelligent widget rendering, and real-time conversation management. This is a development branch forked from V4, ready for new feature development and experimentation.
 
-**Version**: 4.0.0 (forked from 3.0.0)
+**Version**: 6.0.0 (forked from V4 4.0.0)
 **Port**: 3004
-**Status**: Production-ready demo with Claude SDK integration
+**Status**: Development branch - New features
 
 ## Application URLs
 
@@ -262,9 +262,10 @@ Try these persona-specific queries:
 
 ## Project Context
 
-This is V4, forked from V3 which was a complete rewrite from V2:
+This is V6, forked from V4 for new feature development:
 - **V1/V2**: Traditional support ticket dashboard
 - **V3**: Claude-style AI chat interface with SDK integration
-- **V4**: Added multi-persona system, intelligent widget rendering, conversation management
+- **V4**: Added multi-persona system, intelligent widget rendering, conversation management (STABLE)
+- **V6**: New features development branch (forked from V4)
 
-The focus is on demonstrating how an AI assistant interface can adapt to different user roles and intelligently render contextual information based on natural language queries.
+The focus is on demonstrating how an AI assistant interface can adapt to different user roles and intelligently render contextual information based on natural language queries. V6 is the experimental branch for new features before merging back to V4.

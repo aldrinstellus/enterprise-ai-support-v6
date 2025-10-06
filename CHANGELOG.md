@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [6.0.0] - 2025-10-06
+
+### 🎉 Initial Release - V6 Fork from V4
+
+**Forked from V4 commit**: `33f26b4`
+
+This is a fresh development branch for new feature experimentation. All V4 features are included:
+- PerformanceTrendsWidget with multi-line Recharts
+- SentimentAnalysisWidget with progress bars
+- C-Level enrichment (13 Q&A pairs)
+- CS Manager enrichment (14 Q&A pairs)
+- Complete widget system with 19+ widgets
+
+**V4 remains stable** - Use V6 for:
+- New feature development
+- Experimental changes
+- Breaking changes testing
+- Cherry-pick successful features back to V4
+
+---
+
 ## [Unreleased] - 2025-10-06
 
 ### ✨ Added - Widget Enrichment (WIP from Bhanu Reference)
