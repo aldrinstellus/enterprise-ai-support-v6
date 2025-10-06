@@ -622,12 +622,21 @@ export default function Home() {
 
     // NEW: Smart widget query detection (Bhanu's assistant-first interface)
     // Detects natural language queries and routes to appropriate widgets based on persona
-    const widgetMatch = detectWidgetQuery(messageText, currentPersona.id as PersonaId);
+
+    // IMPORTANT: Skip client-side widget detection for queries that should fetch real Zoho data
+    // These queries will be handled by Claude API with real data
+    const shouldUseRealData =
+      messageText.toLowerCase().includes('list') && messageText.toLowerCase().includes('ticket') ||
+      messageText.toLowerCase().includes('show') && messageText.toLowerCase().includes('ticket') ||
+      messageText.toLowerCase().includes('all ticket');
+
+    const widgetMatch = shouldUseRealData ? null : detectWidgetQuery(messageText, currentPersona.id as PersonaId);
 
     // Debug logging to track widget detection
     console.log('[Widget Detection]', {
       query: messageText,
       persona: currentPersona.id,
+      shouldUseRealData,
       matched: !!widgetMatch,
       widgetType: widgetMatch?.widgetType,
       assistantId: assistantId,
@@ -744,6 +753,15 @@ export default function Home() {
                 if (!toolsUsed.includes(parsed.tool)) {
                   toolsUsed.push(parsed.tool);
                 }
+              } else if (parsed.type === 'widget') {
+                // Handle widget data sent separately from text
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantId
+                      ? { ...msg, widgetType: parsed.widgetType as WidgetType, widgetData: parsed.widgetData as WidgetData, widgetLoading: false }
+                      : msg
+                  )
+                );
               } else if (parsed.type === 'text') {
                 accumulatedText = parsed.content;
 
@@ -800,6 +818,31 @@ export default function Home() {
                         );
                       }
                     }
+                  }
+                } else if (accumulatedText.includes('WIDGET_DATA:')) {
+                  const parts = accumulatedText.split('WIDGET_DATA:');
+                  const textPart = parts[0].trim();
+                  const jsonPart = parts[1].trim();
+
+                  try {
+                    const widgetPayload = JSON.parse(jsonPart);
+                    // Update message with widget data
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === assistantId
+                          ? { ...msg, content: textPart, widgetType: widgetPayload.widgetType, widgetData: widgetPayload.widgetData, widgetLoading: false }
+                          : msg
+                      )
+                    );
+                  } catch {
+                    // If JSON parsing fails, just show the text
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === assistantId
+                          ? { ...msg, content: accumulatedText }
+                          : msg
+                      )
+                    );
                   }
                 } else if (accumulatedText.includes('EXECUTION_RESULT:')) {
                   const parts = accumulatedText.split('EXECUTION_RESULT:');
@@ -873,6 +916,9 @@ export default function Home() {
                       // No JSON start found yet, only show text before
                       displayText = beforeDashboard;
                     }
+                  } else if (displayText.includes('WIDGET_DATA:')) {
+                    // Only show text before the widget data
+                    displayText = displayText.split('WIDGET_DATA:')[0].trim();
                   } else if (displayText.includes('EXECUTION_RESULT:')) {
                     // Only show text before the execution result
                     displayText = displayText.split('EXECUTION_RESULT:')[0].trim();
@@ -1369,8 +1415,8 @@ export default function Home() {
                     onClick={() => handleSendMessage()}
                     className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:scale-105 active:scale-95"
                   >
-                    <Send className="h-4 w-4" />
-                    Send
+                    Quick Launch
+                    <kbd className="ml-1 text-xs opacity-70">⌘K</kbd>
                   </button>
                 </div>
               </motion.div>
@@ -1478,8 +1524,8 @@ export default function Home() {
                       onClick={() => handleSendMessage()}
                       className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:scale-105 active:scale-95"
                     >
-                      <Send className="h-4 w-4" />
-                      Send
+                      Quick Launch
+                      <kbd className="ml-1 text-xs opacity-70">⌘K</kbd>
                     </button>
                   </div>
                 </div>

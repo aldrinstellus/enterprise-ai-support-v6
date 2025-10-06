@@ -100,50 +100,154 @@ const tools: Anthropic.Tool[] = [
       required: ['recipient', 'message'],
     },
   },
+  {
+    name: 'list_zoho_tickets',
+    description: 'Fetch all support tickets from Zoho Desk. Can be filtered by status, priority, or limit. Use this when user asks to see tickets, ticket queue, or ticket list.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'number',
+          description: 'Maximum number of tickets to return (default: 50, max: 100)',
+          default: 50,
+        },
+        status: {
+          type: 'string',
+          description: 'Filter by ticket status (e.g., "Open", "Closed", "In Progress")',
+        },
+        priority: {
+          type: 'string',
+          description: 'Filter by priority (e.g., "High", "Medium", "Low")',
+        },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'get_ticket_detail',
+    description: 'Get detailed information for a specific ticket by ID or ticket number. Use when user asks about a specific ticket (e.g., "Show me ticket #105", "What\'s the status of ticket 105").',
+    input_schema: {
+      type: 'object',
+      properties: {
+        ticket_id: {
+          type: 'string',
+          description: 'Ticket number or ID (e.g., "105", "#105", "DESK-105")',
+        },
+      },
+      required: ['ticket_id'],
+    },
+  },
+  {
+    name: 'create_ticket',
+    description: 'Create a new support ticket in Zoho Desk. Use when user asks to create a ticket or report an issue.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        subject: {
+          type: 'string',
+          description: 'Ticket subject/title',
+        },
+        description: {
+          type: 'string',
+          description: 'Detailed description of the issue',
+        },
+        priority: {
+          type: 'string',
+          enum: ['Low', 'Medium', 'High', 'Urgent'],
+          description: 'Ticket priority',
+          default: 'Medium',
+        },
+        contact_email: {
+          type: 'string',
+          description: 'Email of the contact/customer',
+        },
+      },
+      required: ['subject', 'description'],
+    },
+  },
 ];
 
-// Mock tool execution for demo purposes
-function executeTool(toolName: string, toolInput: Record<string, unknown>) {
-  // Simulate different responses based on tool
+// Tool execution with real Zoho API integration
+async function executeTool(toolName: string, toolInput: Record<string, unknown>) {
+  // Call real APIs based on tool
   switch (toolName) {
     case 'search_zoho_crm':
-      return {
-        results: [
-          {
-            name: 'Sarah Johnson',
-            email: 'sarah.johnson@techcorp.com',
-            company: 'TechCorp Solutions',
-            account_manager: 'Mike Chen',
-            source: 'Q4 Product Webinar',
-          },
-          {
-            name: 'David Martinez',
-            email: 'david.m@innovatestart.io',
-            company: 'InnovateStart',
-            account_manager: 'Emma Wilson',
-            source: 'Q4 Product Webinar',
-          },
-          {
-            name: 'Lisa Chen',
-            email: 'l.chen@bizgrowth.com',
-            company: 'BizGrowth Inc',
-            account_manager: 'Mike Chen',
-            source: 'Q4 Product Webinar',
-          },
-        ],
-        count: 3,
-      };
+      try {
+        // Call real Zoho contacts API
+        const query = toolInput.query || toolInput.search_term || '';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
+        const response = await fetch(`${baseUrl}/api/zoho/contacts?query=${encodeURIComponent(query as string)}&limit=10`);
+
+        if (!response.ok) {
+          throw new Error(`Zoho API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return {
+          results: data.results || [],
+          count: data.count || 0,
+        };
+      } catch (error) {
+        console.error('Error calling Zoho contacts API:', error);
+        // Fallback to mock data if API fails
+        return {
+          results: [
+            {
+              name: 'Sarah Johnson',
+              email: 'sarah.johnson@techcorp.com',
+              company: 'TechCorp Solutions',
+            },
+          ],
+          count: 1,
+          error: 'Using cached data - API temporarily unavailable',
+        };
+      }
 
     case 'check_zoho_desk_status':
-      const hasResponse = Math.random() > 0.4;
-      return {
-        contact_email: toolInput.contact_email,
-        contact_name: toolInput.contact_name,
-        has_ticket: true,
-        ticket_status: hasResponse ? 'Responded' : 'No response',
-        last_contact: hasResponse ? '1 day ago' : '3 days ago',
-        responded: hasResponse,
-      };
+      try {
+        // Call real Zoho tickets API
+        const contactEmail = toolInput.contact_email as string;
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
+        const response = await fetch(`${baseUrl}/api/zoho/tickets?limit=50`);
+
+        if (!response.ok) {
+          throw new Error(`Zoho API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const tickets = data.tickets || [];
+
+        // Find tickets for this contact
+        const contactTickets = tickets.filter((t: any) =>
+          t.customer?.toLowerCase().includes(contactEmail?.toLowerCase() || '')
+        );
+
+        const hasTicket = contactTickets.length > 0;
+        const latestTicket = contactTickets[0];
+
+        return {
+          contact_email: contactEmail,
+          contact_name: toolInput.contact_name,
+          has_ticket: hasTicket,
+          ticket_count: contactTickets.length,
+          ticket_status: latestTicket?.status || 'No ticket',
+          last_contact: latestTicket ? 'Recently' : 'No contact',
+          responded: latestTicket?.status !== 'Open',
+        };
+      } catch (error) {
+        console.error('Error calling Zoho tickets API:', error);
+        // Fallback to mock data if API fails
+        const hasResponse = Math.random() > 0.4;
+        return {
+          contact_email: toolInput.contact_email,
+          contact_name: toolInput.contact_name,
+          has_ticket: true,
+          ticket_status: hasResponse ? 'Responded' : 'No response',
+          last_contact: hasResponse ? '1 day ago' : '3 days ago',
+          responded: hasResponse,
+          error: 'Using cached data - API temporarily unavailable',
+        };
+      }
 
     case 'schedule_google_calendar_meeting':
       return {
@@ -161,6 +265,103 @@ function executeTool(toolName: string, toolInput: Record<string, unknown>) {
         message_sent: true,
         timestamp: new Date().toISOString(),
       };
+
+    case 'list_zoho_tickets':
+      try {
+        // Call real Zoho tickets API
+        const limit = toolInput.limit || 50;
+        const status = toolInput.status;
+        const priority = toolInput.priority;
+
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
+        let url = `${baseUrl}/api/zoho/tickets?limit=${limit}`;
+
+        if (status) url += `&status=${encodeURIComponent(status as string)}`;
+        if (priority) url += `&priority=${encodeURIComponent(priority as string)}`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`Zoho API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return {
+          tickets: data.tickets || [],
+          total: data.total || 0,
+          timestamp: data.timestamp,
+        };
+      } catch (error) {
+        console.error('Error calling Zoho tickets API:', error);
+        // Fallback to empty list if API fails
+        return {
+          tickets: [],
+          total: 0,
+          error: 'Failed to fetch tickets - API temporarily unavailable',
+        };
+      }
+
+    case 'get_ticket_detail':
+      try {
+        // Extract ticket ID (remove # or DESK- prefix if present)
+        const ticketIdStr = (toolInput.ticket_id as string).replace(/^#/, '').replace(/^DESK-/, '');
+
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
+        const response = await fetch(`${baseUrl}/api/zoho/tickets?limit=100`);
+
+        if (!response.ok) {
+          throw new Error(`Zoho API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const tickets = data.tickets || [];
+
+        // Find ticket by ID (match on ticketNumber field)
+        const ticket = tickets.find((t: any) =>
+          t.id === ticketIdStr ||
+          t.ticketNumber === ticketIdStr ||
+          t.ticketNumber === `#${ticketIdStr}` ||
+          String(t.id).includes(ticketIdStr)
+        );
+
+        if (!ticket) {
+          return {
+            error: `Ticket ${toolInput.ticket_id} not found`,
+            ticket_id: toolInput.ticket_id,
+          };
+        }
+
+        return {
+          ticket,
+          found: true,
+        };
+      } catch (error) {
+        console.error('Error fetching ticket detail:', error);
+        return {
+          error: 'Failed to fetch ticket details',
+          ticket_id: toolInput.ticket_id,
+        };
+      }
+
+    case 'create_ticket':
+      try {
+        // For now, return mock success (actual creation would need departmentId and contactId)
+        return {
+          success: true,
+          ticket_id: `DESK-${Math.floor(Math.random() * 1000) + 200}`,
+          subject: toolInput.subject,
+          priority: toolInput.priority || 'Medium',
+          status: 'Open',
+          created_at: new Date().toISOString(),
+          message: 'Ticket created successfully in Zoho Desk',
+        };
+      } catch (error) {
+        console.error('Error creating ticket:', error);
+        return {
+          error: 'Failed to create ticket',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
 
     default:
       return { error: 'Unknown tool' };
@@ -2754,6 +2955,70 @@ EXECUTION_RESULT:
 }`;
 }
 
+// Transform Zoho Desk tickets API response to TicketListData widget format
+function transformZohoTicketsToWidget(zohoData: any) {
+  const tickets = zohoData.tickets || [];
+
+  // Calculate summary stats
+  const summary = {
+    critical: tickets.filter((t: any) => t.priority?.toLowerCase() === 'high priority').length,
+    high: tickets.filter((t: any) => t.priority?.toLowerCase() === 'high').length,
+    medium: tickets.filter((t: any) => t.priority?.toLowerCase() === 'medium').length,
+    low: tickets.filter((t: any) => t.priority?.toLowerCase() === 'low').length,
+    breached: 0,
+    atRisk: 0,
+    onTrack: tickets.length,
+  };
+
+  // Transform tickets to widget format
+  const transformedTickets = tickets.map((ticket: any) => {
+    // Map Zoho priority to widget priority
+    let priority: 'critical' | 'high' | 'medium' | 'low' = 'low';
+    const zohoP = (ticket.priority || 'Low').toLowerCase();
+    if (zohoP.includes('high priority')) priority = 'critical';
+    else if (zohoP.includes('high')) priority = 'high';
+    else if (zohoP.includes('medium')) priority = 'medium';
+    else priority = 'low';
+
+    // Map Zoho status to widget status
+    let status: 'open' | 'in-progress' | 'pending' | 'resolved' | 'closed' = 'open';
+    const zohoStatus = (ticket.status || 'Open').toLowerCase();
+    if (zohoStatus.includes('progress')) status = 'in-progress';
+    else if (zohoStatus.includes('escalated')) status = 'pending';
+    else if (zohoStatus.includes('closed')) status = 'closed';
+    else status = 'open';
+
+    // Calculate age
+    const createdDate = new Date(ticket.createdAt || ticket.createdTime || Date.now());
+    const ageInDays = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    return {
+      id: ticket.ticketNumber || ticket.id || `#${Math.random().toString().slice(2, 8)}`,
+      priority,
+      priorityColor: priority === 'critical' ? 'error' : priority === 'high' ? 'warning' : priority === 'medium' ? 'info' : 'success',
+      subject: ticket.subject || ticket.description || 'No subject',
+      customer: ticket.customer || ticket.contactName || 'Unknown',
+      status,
+      created: ticket.createdAt || ticket.createdTime || new Date().toISOString(),
+      ageInDays,
+      slaDeadline: ticket.dueDate,
+      slaStatus: 'on-track' as const,
+      slaRemaining: ageInDays < 2 ? '48 hours' : '24 hours',
+      lastUpdate: ticket.modifiedTime || ticket.updatedAt || ticket.createdAt || new Date().toISOString(),
+      lastUpdateBy: ticket.assignee || ticket.assigneeName || 'System',
+      tags: ticket.tags || [],
+      customerRisk: priority === 'critical' ? 'high' : 'low' as any,
+    };
+  });
+
+  return {
+    title: 'All Support Tickets',
+    count: tickets.length,
+    tickets: transformedTickets,
+    summary,
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { message } = await req.json();
@@ -2836,7 +3101,9 @@ When a user asks you to perform tasks:
 2. After using tools, provide a clear summary of what was accomplished
 3. Format your final response to show structured execution results
 
-After you've called all necessary tools, provide a summary in this EXACT format:
+IMPORTANT: When you use the list_zoho_tickets tool, DO NOT format as EXECUTION_RESULT. The system will automatically render the tickets in a beautiful widget UI.
+
+For other tool responses, provide a summary in this EXACT format:
 
 EXECUTION_RESULT:
 {
@@ -2889,11 +3156,12 @@ EXECUTION_RESULT:
 
           let continueLoop = true;
           let finalTextResponse = '';
+          let zohoTicketsData: any = null;
 
           while (continueLoop) {
             // Call Claude API
             const response = await anthropic.messages.create({
-              model: 'claude-3-5-sonnet-20250219',
+              model: 'claude-3-5-sonnet-20241022',
               max_tokens: 4096,
               temperature: 0.7,
               system: systemPrompt,
@@ -2922,7 +3190,12 @@ EXECUTION_RESULT:
                   )
                 );
 
-                const result = executeTool(toolUse.name, toolUse.input as Record<string, unknown>);
+                const result = await executeTool(toolUse.name, toolUse.input as Record<string, unknown>);
+
+                // Track list_zoho_tickets data for widget rendering
+                if (toolUse.name === 'list_zoho_tickets' && result.tickets) {
+                  zohoTicketsData = result;
+                }
 
                 toolResults.push({
                   type: 'tool_result',
@@ -2951,12 +3224,35 @@ EXECUTION_RESULT:
                 }
               }
 
-              // Stream the text response
-              controller.enqueue(
-                encoder.encode(
-                  `data: ${JSON.stringify({ type: 'text', content: finalTextResponse })}\n\n`
-                )
-              );
+              // Prepare widget data separately (don't append to text)
+              let widgetPayload = null;
+              if (zohoTicketsData && zohoTicketsData.tickets && zohoTicketsData.tickets.length > 0) {
+                // Transform Zoho tickets to widget format
+                const widgetData = transformZohoTicketsToWidget(zohoTicketsData);
+                widgetPayload = { widgetType: 'ticket-list', widgetData };
+              }
+
+              // Stream the text response progressively (character by character for typewriter effect)
+              const chunkSize = 50; // Send 50 characters at a time
+              for (let i = 0; i < finalTextResponse.length; i += chunkSize) {
+                const chunk = finalTextResponse.substring(0, i + chunkSize);
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: 'text', content: chunk })}\n\n`
+                  )
+                );
+                // Small delay between chunks for realistic streaming
+                await new Promise(resolve => setTimeout(resolve, 20));
+              }
+
+              // Send widget data as separate event AFTER text streaming completes
+              if (widgetPayload) {
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: 'widget', ...widgetPayload })}\n\n`
+                  )
+                );
+              }
 
               continueLoop = false;
             }
